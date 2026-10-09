@@ -17,6 +17,7 @@ class WorkerResponseSchema(BaseModel):
     tg: str|None=None
     task: str|None = None
     deadline: datetime | None = None
+    deadline_point: int | None = None
 
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy import String
 from datetime import datetime
 from sqlalchemy import DateTime, String
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from DataBase.database import Base
 
 class Workers(Base):
@@ -18,3 +18,5 @@ class Workers(Base):
     task:Mapped[str|None]=mapped_column(String(1000))
 
     deadline:Mapped[datetime|None]=mapped_column(DateTime(timezone=True), default=None)
+
+    deadline_point:Mapped[int|None]=mapped_column(default=None)

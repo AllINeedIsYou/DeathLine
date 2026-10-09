@@ -14,6 +14,7 @@ def add_time_task_id(worker_id:int, task: str, deadline:datetime, session:Sessio
 
     worker.task=task
     worker.deadline=deadline
+    worker.deadline_point=1
 
     session.add(worker)
     session.commit()
