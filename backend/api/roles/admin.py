@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from datetime import datetime
 from DataBase.database import SessionDep
 from api.shemas import WorkerCreateSchema, WorkerResponseSchema,TaskResponseSchema,TaskCreateSchema
-from DataBase.models import Workers
-from api.service.services_admin import add_task
+from DataBase.models import Workers, Tasks
+from api.service.services_admin import add_task,find_task_for_id
 
 admin_router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -24,3 +24,12 @@ def get_workers(session:SessionDep):
 @admin_router.post('/add_task',summary='Создание задачи',response_model=TaskResponseSchema)
 def new_add_task(session:SessionDep, task_data: TaskCreateSchema):
     return add_task(session=session,task_data=task_data)
+
+@admin_router.get('/get_all_task',summary="Список всех созданных задач",response_model=list[TaskResponseSchema])
+def get_all_tasks(session:SessionDep):
+    return  session.query(Tasks).all()
+
+@admin_router.get('/get_all_task/{worker_id}',summary="Возвращение всех задач конкретного работника",response_model=list[TaskResponseSchema])
+def get_task_by_id(session:SessionDep,worker_id:int):
+    return find_task_for_id(session=session,worker_id=worker_id)
+

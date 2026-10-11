@@ -5,13 +5,14 @@ from datetime import datetime
 
 from api.shemas import TaskCreateSchema,TaskResponseSchema
 
-
+#функция добавления задачи
 def add_task(session: SessionDep, task_data:TaskCreateSchema):
     worker = session.query(Workers).filter(Workers.id == task_data.worker_id).first()
     if worker is None:
         raise HTTPException(status_code=404, detail="Worker not found")
-
+    #херачим в списк
     task_dict = task_data.model_dump()
+    #вручную присваиваем время сейчас
     task_dict["created_at"] = datetime.now()
     new_task = Tasks(**task_dict)
 
@@ -19,6 +20,13 @@ def add_task(session: SessionDep, task_data:TaskCreateSchema):
     session.commit()
     session.refresh(new_task)
     return new_task
+#функция для возвращения всех задач конкретного работника
+def find_task_for_id(session: SessionDep, worker_id:int):
+    worker = session.query(Tasks).filter(Tasks.worker_id== worker_id).first()
+    if worker is None:
+        raise HTTPException(status_code=404, detail="Worker not found")
+    all_worker_tasks = session.query(Tasks).filter(Tasks.worker_id == worker_id).all()
+    return all_worker_tasks
 
 
 
