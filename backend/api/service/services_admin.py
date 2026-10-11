@@ -23,6 +23,7 @@ def add_task(session: SessionDep, task_data:TaskCreateSchema):
 
     #вручную присваиваем время сейчас
     task_dict["created_at"]=now
+    task_dict['updated_at']=now
     new_task = Tasks(**task_dict)
 
     session.add(new_task)
@@ -40,6 +41,7 @@ def find_task_for_id(session: SessionDep, worker_id:int):
     employee_tasks=session.query(Tasks).filter(Tasks.worker_id == worker_id).all()
     return employee_tasks
 
+#функция изменения задачи
 def task_editing(session: SessionDep, task_id:int, task_data:TaskUpdateSchema):
     task = session.query(Tasks).filter(Tasks.id == task_id).first()
 
@@ -53,10 +55,12 @@ def task_editing(session: SessionDep, task_id:int, task_data:TaskUpdateSchema):
 
     for field in ("title", "priority", "deadline"):
         if field in update_data and update_data[field] is None:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Поле {field} нельзя передать как null"
-            )
+            raise HTTPException(status_code=422,detail=f"Поле {field} нельзя передать как null")
+        if field=="deadline" and  field in update_data:
+            if update_data[field].tzinfo is None:
+                    raise HTTPException(status_code=422, detail="Incorrect timezone")
+
+    task.updated_at = datetime.now(timezone.utc)
 
     # key столбец  value новое значение
     for key, value in update_data.items(): #.item как раз и берет парам столбец|новое значение
@@ -68,6 +72,7 @@ def task_editing(session: SessionDep, task_id:int, task_data:TaskUpdateSchema):
     session.refresh(task)
     return task
 
+#отметка о готовности
 def complete_task(session: SessionDep, task_id:int):
     task = session.query(Tasks).filter(Tasks.id == task_id).first()
     if task is None:
@@ -76,9 +81,16 @@ def complete_task(session: SessionDep, task_id:int):
         return task
 
     task.completed_at = datetime.now(timezone.utc)
+    task.updated_at = datetime.now(timezone.utc)
 
     session.commit()
     session.refresh(task)
+    return task
+
+def find_only_task(session: SessionDep, task_id:int):
+    task = session.query(Tasks).filter(Tasks.id == task_id).first()
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
     return task
 
 
@@ -92,50 +104,3 @@ def complete_task(session: SessionDep, task_id:int):
 
 
 
-
-# def add_time_task_id(worker_id:int,session:SessionDep,task: str|None=None, deadline:datetime|None=None):
-#     worker=session.query(Workers).filter(Workers.id == worker_id).first()
-#     if not worker:
-#         raise HTTPException(status_code=404,detail='Такого работнитка не существует')
-#
-#     if task is not None:
-#         worker.task = task
-#
-#     if deadline is not None:
-#         worker.deadline = deadline
-#         worker.deadline_point = 1
-#
-#     session.add(worker)
-#     session.commit()
-#     session.refresh(worker)
-#
-#     return f'Успешно! Работнику {worker.name}. Вы выдали задачу {worker.task}, с таким дедлайном {worker.deadline}'
-#
-# def del_time_id(worker_id:int, session:SessionDep):
-#     worker = session.query(Workers).filter(Workers.id == worker_id).first()
-#     if not worker:
-#         raise HTTPException(status_code=404,detail='Такого работнитка не существует')
-#     if worker.deadline is None:
-#         raise HTTPException(status_code=404, detail='Дедлайн не задан')
-#
-#     worker.deadline=None
-#     worker.deadline_point = None
-#     session.add(worker)
-#     session.commit()
-#     session.refresh(worker)
-#     return f'Дедлайн с работника {worker.name} успешно удален'
-#
-#
-# def del_task_id(worker_id: int, session: SessionDep):
-#     worker = session.query(Workers).filter(Workers.id == worker_id).first()
-#     if not worker:
-#         raise HTTPException(status_code=404, detail='Такого работнитка не существует')
-#     if worker.task is None:
-#         raise HTTPException(status_code=404, detail='Задания не задано')
-#
-#     worker.task = None
-#
-#     session.add(worker)
-#     session.commit()
-#     session.refresh(worker)
-#     return f'Задание с работника {worker.name} успешно удалено'

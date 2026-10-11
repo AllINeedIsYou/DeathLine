@@ -43,3 +43,5 @@ class Tasks(Base):
     created_at:Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)
 
     completed_at:Mapped[datetime|None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
+    updated_at:Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)

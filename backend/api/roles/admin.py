@@ -3,7 +3,7 @@ from datetime import datetime
 from DataBase.database import SessionDep
 from api.shemas import WorkerCreateSchema, WorkerResponseSchema,TaskResponseSchema,TaskCreateSchema,TaskUpdateSchema
 from DataBase.models import Workers, Tasks
-from api.service.services_admin import add_task,find_task_for_id,task_editing,complete_task
+from api.service.services_admin import add_task,find_task_for_id,task_editing,complete_task,find_only_task
 
 admin_router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -40,3 +40,7 @@ def edit_task(session:SessionDep, task_id:int, task_data: TaskUpdateSchema):
 @admin_router.patch('/complete_task/{task_id}',summary='Отметка о готовности',response_model=TaskResponseSchema)
 def complete_task_by_id(session:SessionDep, task_id:int):
     return complete_task(session=session,task_id=task_id)
+
+@admin_router.get('/get_task/{task_id}',summary="Возвращение конкретной задачи",response_model=TaskResponseSchema)
+def get_task(session:SessionDep,task_id:int):
+    return find_only_task(session=session,task_id=task_id)

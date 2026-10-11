@@ -35,6 +35,7 @@ class TaskResponseSchema(TaskCreateSchema):
     id: int
     created_at: datetime
     completed_at: datetime|None=Field(default=None)
+    updated_at: datetime
 
 class TaskUpdateSchema(BaseModel):
   title: str | None = Field(default=None, max_length=120, min_length=1)
