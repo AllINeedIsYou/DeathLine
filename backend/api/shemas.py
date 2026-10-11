@@ -26,7 +26,7 @@ class TaskCreateSchema(BaseModel):
     title: str = Field(max_length=120,min_length=1)
     description: str|None = Field(max_length=2000,default=None)
     priority: priorities
-    deadline: datetime
+    deadline: datetime= Field(default=None)
 
 
 class TaskResponseSchema(TaskCreateSchema):

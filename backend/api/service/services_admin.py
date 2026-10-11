@@ -22,11 +22,13 @@ def add_task(session: SessionDep, task_data:TaskCreateSchema):
     return new_task
 #функция для возвращения всех задач конкретного работника
 def find_task_for_id(session: SessionDep, worker_id:int):
-    worker = session.query(Tasks).filter(Tasks.worker_id== worker_id).first()
+    worker=session.query(Workers).filter(Workers.id == worker_id).first()
+
     if worker is None:
-        raise HTTPException(status_code=404, detail="Worker not found")
-    all_worker_tasks = session.query(Tasks).filter(Tasks.worker_id == worker_id).all()
-    return all_worker_tasks
+        raise HTTPException(status_code=404, detail="The employee not found.")
+
+    employee_tasks=session.query(Tasks).filter(Tasks.worker_id == worker_id).all()
+    return employee_tasks
 
 def task_editing(session: SessionDep, task_id:int, task_data:TaskUpdateSchema):
     task = session.query(Tasks).filter(Tasks.id == task_id).first()
