@@ -1,8 +1,7 @@
-from sqlalchemy import String
 from datetime import datetime
 from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
-from DataBase.database import Base
+from backend.DataBase.database import Base
 
 class Workers(Base):
     __tablename__ = 'Workers'

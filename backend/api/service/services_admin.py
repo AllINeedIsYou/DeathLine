@@ -1,5 +1,5 @@
-from DataBase.database import SessionDep
-from DataBase.models import Workers
+from backend.DataBase.database import SessionDep
+from backend.DataBase.models import Workers
 from fastapi import HTTPException
 from datetime import datetime
 

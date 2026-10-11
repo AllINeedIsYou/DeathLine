@@ -1,8 +1,8 @@
 from fastapi import APIRouter
-from DataBase.database import SessionDep
-from api.shemas import WorkerCreateSchema, WorkerResponseSchema
-from DataBase.models import Workers
-from api.service.services_admin import add_time_task_id,del_task_id,del_time_id
+from backend.DataBase.database import SessionDep
+from backend.api.shemas import WorkerCreateSchema, WorkerResponseSchema
+from backend.DataBase.models import Workers
+from backend.api.service.services_admin import add_time_task_id,del_task_id,del_time_id
 from datetime import datetime
 admin_router = APIRouter(prefix="/admin", tags=["admin"])
 
