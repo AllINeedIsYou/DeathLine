@@ -1,0 +1,54 @@
+.invites-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 20px; }
+.invites-toolbar > span { color: #7397bd; font-size: 10px; letter-spacing: 1.1px; text-align: right; overflow-wrap: anywhere; }
+.invites-toolbar strong { color: #a8c7e2; font-weight: 500; }
+.invites-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+.invites-main { min-width: 0; }
+.invites-filters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; margin-bottom: 19px; }
+.invites-filters button { min-height: 70px; background: #05172d; border: 1px solid #194466; border-radius: 9px; color: #8caed1; text-align: left; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 10px; }
+.invites-filters strong { font-size: 21px; color: #d3e3f7; font-weight: 600; }
+.invites-filters button[aria-pressed="true"] { border-color: #00bbee; background: #06324b80; }
+.invites-filters button[aria-pressed="true"] strong, .invites-filters button[aria-pressed="true"] span { color: #65dfff; }
+.invites-list .admin-panel__heading > span { color: #7b9dc1; font-size: 10px; white-space: nowrap; margin-top: 4px; }
+.invite-row { padding: 20px 0; border-top: 1px solid #1a3b5b; }
+.invite-row:last-child { padding-bottom: 0; }
+.invite-row__identity { display: flex; gap: 12px; align-items: center; }
+.invite-avatar { display: grid; place-items: center; flex-shrink: 0; width: 38px; height: 38px; border: 1px solid #236186; border-radius: 50%; background: #0c2e46; color: #51c6ef; }
+.invite-avatar--admin { color: #ccbbf5; border-color: #4c467a; background: #23263e; }
+.invite-avatar svg { width: 18px; height: 18px; }
+.invite-row__identity > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.invite-row__identity strong { font-size: 13px; font-weight: 550; color: #dce9fc; overflow-wrap: anywhere; line-height: 1.5; }
+.invite-row__identity > div > span { font-size: 10px; color: #86a9ce; }
+.invite-status { font-size: 10px; padding: 6px 9px; border: 1px solid #235f7b; border-radius: 6px; color: #76d9f6; background: #0b3146; flex-shrink: 0; }
+.invite-status--accepted { color: #5bd9bc; background: #0a352f80; border-color: #165f54; }
+.invite-status--expired { color: #ddbc7c; background: #3a2d1a50; border-color: #665235; }
+.invite-status--revoked { color: #a3acc1; background: #21293e; border-color: #39485c; }
+.invite-row__bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin: 17px 0 0 50px; }
+.invite-row__bottom > span { color: #7699be; font-size: 10px; line-height: 1.7; }
+.invite-row__actions { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.invite-row__actions button, .invite-row__actions a, .invite-share > a { border: 0; background: transparent; padding: 3px 0; font-size: 10px; color: #5ecff3; text-decoration: none; line-height: 1.7; }
+.invite-row__actions .invite-cancel { color: #9baac3; }
+.invite-row__actions button:hover, .invite-row__actions a:hover, .invite-share > a:hover { color: #d0f4ff; }
+.invites-create { position: sticky; top: 96px; }
+.invites-create .admin-panel__heading { align-items: center; }
+.invites-create .invites-kicker { margin: 0 0 10px; color: #6597bb; letter-spacing: 1px; font-size: 9px; }
+.invites-create form > label { display: block; color: #bcd0e9; font-size: 11px; margin: 22px 0 10px; }
+.invites-create input, .invites-create select { width: 100%; min-width: 0; height: 48px; color: #d2e3f7; background: #04142b; border: 1px solid #22567d; border-radius: 8px; padding: 12px 14px; font-family: inherit; font-size: 12px; }
+.invites-create select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2395b5d8' stroke-width='1.7'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 35px; }
+.invites-create input:focus, .invites-create select:focus { outline: 2px solid #00c8ff35; outline-offset: 2px; border-color: #00c8ff; }
+.invites-create input::placeholder { color: #6e91b8; }
+.invites-role-hint, .invites-form-foot { color: #819fc2; font-size: 10px; line-height: 1.9; margin: 12px 0 20px; }
+.invites-form-foot { margin: 15px 0 0; }
+.invites-create .employee-button { width: 100%; justify-content: center; min-height: 46px; }
+.invite-share { border-top: 1px solid #20516f; margin-top: 24px; padding-top: 22px; }
+.invite-share > strong { color: #79dfcd; font-size: 13px; font-weight: 550; }
+.invite-share > p { font-size: 10px; color: #9db6d3; line-height: 1.7; overflow-wrap: anywhere; }
+.invite-share input { font-size: 10px; margin: 3px 0 12px; }
+.invite-share > a { display: block; text-align: center; margin-top: 13px; }
+.invite-confirm { background: #152035; border: 1px solid #454b61; border-radius: 8px; margin-top: 16px; padding: 13px; }
+.invite-confirm p { color: #c4cfe4; font-size: 11px; line-height: 1.7; margin: 0 0 10px; }
+.invite-confirm button { background: #253449; border: 1px solid #4d5b72; border-radius: 6px; padding: 9px 12px; margin: 4px 9px 0 0; color: #d2e2f3; font-size: 11px; }
+.invite-confirm button:first-of-type { color: #f5bdc5; }
+.invites-directory-action { display: flex; justify-content: flex-end; margin-bottom: 18px; }
+@media(max-width: 1250px) { .invites-layout { grid-template-columns: minmax(0, 1fr) 290px; gap: 16px; } .invites-filters { gap: 6px; } .invites-filters button { padding: 10px 8px; font-size: 9px; } .invite-row__bottom { margin-left: 0; } }
+@media(max-width: 1000px) { .invites-layout { grid-template-columns: 1fr; } .invites-create { position: static; grid-row: 1; } .invites-create form { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; align-items: start; } .invites-create form > label:first-child { grid-column: 1; grid-row: 1; } .invites-create form > input { grid-column: 1; grid-row: 2; } .invites-create form > label:nth-of-type(2) { grid-column: 2; grid-row: 1; } .invites-create form > select { grid-column: 2; grid-row: 2; } .invites-create form > p, .invites-create form > button { grid-column: 1 / -1; } .invites-create form > label { margin-top: 6px; } }
+@media(max-width: 520px) { .invites-create form { display: block; } .invites-create form > label { margin-top: 21px; } .invites-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } .invites-filters button { min-height: 65px; font-size: 10px; padding: 10px; } .invite-row__identity { flex-wrap: wrap; gap: 10px; } .invite-row__identity > div { flex-basis: calc(100% - 48px); } .invite-status { margin-left: 48px; } .invites-toolbar { align-items: flex-start; } .invites-directory-action .employee-button { width: 100%; justify-content: center; } }
