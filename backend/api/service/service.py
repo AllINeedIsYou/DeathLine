@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.DataBase.database import Base, engine
+from DataBase.database import Base, engine
 
 
 service_router=APIRouter(prefix='/service')
