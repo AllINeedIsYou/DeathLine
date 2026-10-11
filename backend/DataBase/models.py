@@ -38,7 +38,7 @@ class Tasks(Base):
 
     priority:Mapped[priorities]=mapped_column(nullable=False)
 
-    deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     created_at:Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)
 
