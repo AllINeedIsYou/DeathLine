@@ -36,6 +36,12 @@ class TaskResponseSchema(TaskCreateSchema):
     created_at: datetime
     completed_at: datetime|None=Field(default=None)
 
+class TaskUpdateSchema(BaseModel):
+  title: str | None = Field(default=None, max_length=120, min_length=1)
+  description: str | None = Field(default=None, max_length=2000)
+  priority: priorities | None = None
+  deadline: datetime | None = None
+  completed_at: datetime | None = None
 
 
 

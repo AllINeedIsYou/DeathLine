@@ -3,7 +3,7 @@ from DataBase.models import Workers,Tasks
 from fastapi import HTTPException
 from datetime import datetime
 
-from api.shemas import TaskCreateSchema,TaskResponseSchema
+from api.shemas import TaskCreateSchema,TaskUpdateSchema
 
 #функция добавления задачи
 def add_task(session: SessionDep, task_data:TaskCreateSchema):
@@ -28,7 +28,24 @@ def find_task_for_id(session: SessionDep, worker_id:int):
     all_worker_tasks = session.query(Tasks).filter(Tasks.worker_id == worker_id).all()
     return all_worker_tasks
 
+def task_editing(session: SessionDep, task_id:int, task_data:TaskUpdateSchema):
+    task = session.query(Tasks).filter(Tasks.id == task_id).first()
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
 
+    # получаем словарь из данных, отбрасывая непереданные (None) поля
+    update_data = task_data.model_dump(exclude_unset=True)
+
+    # key столбец  value новое значение
+    for key, value in update_data.items(): #.item как раз и берет парам столбец|новое значение
+        #люся,поменяй столбец key на новое значение value в task
+        setattr(task, key, value)
+
+
+    session.commit()
+    session.refresh(task)
+
+    return task
 
 
 
