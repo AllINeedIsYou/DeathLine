@@ -1,0 +1,76 @@
+.admin-goat-period { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; color: #a4bedf; font-size: 12px; }
+.admin-goat-period > span { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.admin-goat-period svg { width: 18px; height: 18px; color: #00c8ff; }
+.admin-goat-period time { text-transform: capitalize; }
+.admin-goat-period small { color: #769bc4; border: 1px solid #1a3a5e; padding: 5px 9px; border-radius: 5px; font-size: 9px; }
+.admin-goat-period p { margin: 0; font-size: 11px; color: #839fc2; }
+.admin-goat-period strong { color: #d9e7fa; }
+.admin-goat-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.admin-goat-card { min-width: 0; border: 1px solid #99763a60; border-radius: 14px; padding: 28px; background: radial-gradient(ellipse at 0% 0%, #8b611c22, transparent 70%), #04132b; }
+.admin-goat-card--worst { border-color: #ae4c5f55; background: radial-gradient(ellipse at 0% 0%, #87283e22, transparent 70%), #04132b; }
+.admin-goat-card__heading { display: flex; align-items: center; gap: 10px; color: #e9bf72; min-height: 23px; }
+.admin-goat-card--worst .admin-goat-card__heading { color: #e091a0; }
+.admin-goat-card__heading h2 { margin: 0; font-size: 11px; font-weight: 500; letter-spacing: .6px; line-height: 1.7; text-transform: uppercase; }
+.admin-goat-card__heading > svg { width: 20px; height: 20px; flex: 0 0 auto; }
+.admin-goat-card__heading > span { margin-left: auto; flex: 0 0 auto; font-size: 8px; color: #be8590; padding: 4px 7px; border: 1px solid #91455560; border-radius: 4px; }
+.admin-goat-card__tie { margin: 16px 0 0; font-size: 11px; color: #a1b8d5; }
+.admin-goat-person { margin-top: 30px; }
+.admin-goat-person + .admin-goat-person { padding-top: 26px; border-top: 1px solid #24415f; }
+.admin-goat-person__link { display: flex; align-items: center; gap: 16px; background: none; border: 0; padding: 0; color: inherit; width: 100%; text-align: left; cursor: pointer; }
+.admin-goat-person__link .admin-avatar { width: 66px; height: 66px; font-size: 22px; flex: 0 0 auto; }
+.admin-goat-person__link > span:nth-child(2) { min-width: 0; flex: 1; }
+.admin-goat-person__link strong { display: block; font-size: 25px; line-height: 1.4; font-weight: 650; color: #edf5ff; overflow-wrap: anywhere; }
+.admin-goat-person__link small { display: block; font-size: 12px; line-height: 1.7; color: #9db7d8; margin-top: 4px; overflow-wrap: anywhere; }
+.admin-goat-person__link > svg { flex: 0 0 auto; color: #7b9bbf; width: 19px; height: 19px; }
+.admin-goat-person__link:hover strong { color: #64d9ff; }
+.admin-goat-person__score { display: flex; align-items: center; gap: 17px; margin: 29px 0 27px; }
+.admin-goat-person__score > strong { font-size: clamp(56px, 5.8vw, 82px); line-height: 1; letter-spacing: -3px; color: #f0c982; font-variant-numeric: tabular-nums; }
+.admin-goat-person__score > span { font-size: 11px; line-height: 1.9; color: #a9bdd8; }
+.admin-goat-person__score > svg { width: 62px; height: 62px; stroke-width: 1; margin-left: auto; color: #b78e4845; }
+.admin-goat-card--worst .admin-goat-person__score > strong { color: #df8fa1; }
+.admin-goat-card--worst .admin-goat-person__score > svg { color: #b3637945; }
+.admin-goat-person__metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; gap: 14px; padding-top: 22px; border-top: 1px solid #81653c40; }
+.admin-goat-card--worst .admin-goat-person__metrics { border-color: #80445340; }
+.admin-goat-person__metrics > div { display: flex; flex-direction: column-reverse; gap: 8px; }
+.admin-goat-person__metrics dd { margin: 0; color: #e2edfc; font-size: 25px; font-weight: 600; }
+.admin-goat-person__metrics dt { color: #99b2d1; font-size: 10px; line-height: 1.7; }
+.admin-goat-person__open { width: 100%; justify-content: space-between; margin-top: 26px; font-size: 12px; min-height: 44px; }
+.admin-goat-card__empty { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 300px; color: #7997bc; }
+.admin-goat-card__empty > svg { width: 45px; height: 45px; opacity: .6; }
+.admin-goat-card__empty h3 { color: #d1e1f7; font-size: 20px; margin: 22px 0 10px; }
+.admin-goat-card__empty p { max-width: 330px; margin: 0; font-size: 12px; line-height: 1.9; }
+.admin-goat-rules { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 25px; }
+.admin-goat-rules__intro { display: flex; align-items: center; gap: 16px; }
+.admin-goat-rules__intro > svg { width: 27px; height: 27px; flex: 0 0 auto; color: #6e94bc; }
+.admin-goat-rules h2 { margin: 0 0 8px; color: #d9e7fa; font-size: 14px; }
+.admin-goat-rules__intro p, .admin-goat-rules__minimum { margin: 0; color: #8ba7cb; font-size: 11px; line-height: 1.9; }
+.admin-goat-rules__weights { display: flex; gap: 32px; padding-left: 30px; border-left: 1px solid #18416a; }
+.admin-goat-rules__weights > div { display: flex; flex-direction: column; gap: 8px; }
+.admin-goat-rules__weights strong { color: #64c9ef; font-size: 32px; font-weight: 600; }
+.admin-goat-rules__weights strong span { font-size: 16px; color: #6f9cbf; margin-left: 3px; }
+.admin-goat-rules__weights > div > span { color: #9cb6d8; font-size: 10px; }
+.admin-goat-rules__minimum { grid-column: 1 / -1; padding-top: 18px; border-top: 1px solid #153957; }
+.admin-goat-rules__minimum strong { color: #d5e5f9; }
+@media (max-width: 1100px) {
+  .admin-goat-card { padding: 23px; }
+  .admin-goat-card__heading { flex-wrap: wrap; min-height: 54px; align-content: flex-start; }
+  .admin-goat-card__heading > span { margin-left: 30px; }
+  .admin-goat-person__link strong { font-size: 22px; }
+  .admin-goat-person__link .admin-avatar { width: 52px; height: 52px; font-size: 18px; }
+  .admin-goat-person__score > svg { width: 42px; height: 42px; }
+}
+@media (max-width: 850px) {
+  .admin-goat-cards { grid-template-columns: minmax(0, 1fr); }
+  .admin-goat-card__heading > span { margin-left: auto; }
+  .admin-goat-rules { grid-template-columns: minmax(0, 1fr); gap: 21px; }
+  .admin-goat-rules__weights { padding-left: 43px; border: 0; gap: 45px; }
+}
+@media (max-width: 400px) {
+  .admin-goat-card { padding: 20px; }
+  .admin-goat-card__heading > span { margin-left: 30px; }
+  .admin-goat-person__score { gap: 12px; }
+  .admin-goat-person__score > svg { display: none; }
+  .admin-goat-person__metrics { gap: 10px; }
+  .admin-goat-person__metrics dt { font-size: 9px; }
+  .admin-goat-rules__weights { padding-left: 0; justify-content: space-around; gap: 15px; }
+}

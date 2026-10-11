@@ -1,0 +1,114 @@
+.admin-people-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; margin-bottom: 22px; }
+.admin-people-summary > div { display: flex; align-items: center; gap: 18px; min-height: 110px; padding: 23px; border: 1px solid #164575; border-radius: 11px; background: radial-gradient(ellipse at 0% 0%, #00659125, transparent 80%), #04132b; }
+.admin-people-summary > div > svg { color: #00c8ff; width: 31px; height: 31px; }
+.admin-people-summary > div > span { display: flex; flex-direction: column; gap: 10px; color: #9db9dd; font-size: 12px; }
+.admin-people-summary strong { font-size: 30px; line-height: 1; font-weight: 700; color: #eef5ff; }
+.admin-people-directory .admin-panel__heading { align-items: center; }
+.admin-people-directory .admin-panel__heading > span { color: #809fc4; font-size: 11px; }
+.admin-people-table-wrap { position: relative; max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #225985 #07162e; }
+.admin-people-table { width: 100%; min-width: 700px; border-collapse: collapse; text-align: left; font-size: 13px; }
+.admin-people-table thead th { padding: 13px 14px; border-bottom: 1px solid #164575; font-size: 10px; font-weight: 500; color: #8eadd3; white-space: nowrap; }
+.admin-people-table tbody th, .admin-people-table td { padding: 19px 14px; border-bottom: 1px solid #15427070; font-weight: 500; }
+.admin-people-table tbody tr:last-child > * { border-bottom: 0; }
+.admin-people-row { cursor: pointer; transition: background-color .16s ease; }
+.admin-people-row:hover, .admin-people-row:focus-within { background: #0b365340; }
+.admin-people-row__arrow { display: flex; align-items: center; justify-content: center; color: #29cfff; }
+.admin-people-row:hover .admin-people-row__arrow { transform: translateX(3px); }
+.admin-people-table td { font-variant-numeric: tabular-nums; }
+.admin-people-table th:not(:first-child), .admin-people-table td { text-align: center; }
+.admin-people-table .admin-person-button { font-size: 13px; gap: 13px; }
+.admin-people-table .admin-person-button .admin-avatar { width: 42px; height: 42px; font-size: 12px; }
+.admin-people-table .admin-person-button > span:last-child { display: flex; flex-direction: column; gap: 6px; }
+.admin-people-table strong { font-weight: 600; }
+.admin-people-table small { color: #8ba9ce; font-size: 11px; font-weight: 400; }
+.admin-people-table .employee-icon-button { margin-inline: auto; color: #29cfff; }
+.admin-people-done { color: #26d4b2; }
+.admin-people-back { margin-bottom: 17px; font-size: 12px; }
+.admin-people-back > svg { transform: rotate(180deg); }
+.admin-people-back > span { color: #a9bfdd; margin-left: 6px; }
+.admin-people-hero { display: flex; align-items: center; flex-wrap: wrap; gap: 21px; margin-bottom: 20px; padding: 25px; }
+.admin-people-hero > .admin-avatar { width: 70px; height: 70px; font-size: 24px; border-color: #1f7ca5; }
+.admin-people-hero__name { min-width: 0; flex: 1; }
+.admin-people-hero__name p { margin: 0 0 7px; color: #7399c4; font-size: 9px; letter-spacing: 1.5px; }
+.admin-people-hero__name h2 { margin: 0; color: #f3f7ff; font-size: 28px; line-height: 1.3; overflow-wrap: anywhere; }
+.admin-people-hero__name > span { display: block; color: #a9c1e2; font-size: 13px; line-height: 1.6; margin-top: 7px; overflow-wrap: anywhere; }
+.admin-people-hero__actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.admin-people-hero__actions .employee-button { min-height: 44px; font-size: 11px; padding: 11px 15px; }
+.admin-person-contacts { margin-bottom: 20px; padding: 22px 25px; }
+.admin-person-contacts dl { display: grid; grid-template-columns: 1.1fr .8fr 1fr 1.3fr; margin: 0; }
+.admin-person-contacts dl > div { min-width: 0; padding: 0 20px; border-left: 1px solid #163a5b; }
+.admin-person-contacts dl > div:first-child { padding-left: 0; border-left: 0; }
+.admin-person-contacts dl > div:last-child { padding-right: 0; }
+.admin-person-contacts dt { display: flex; align-items: center; gap: 7px; color: #8aa9ce; font-size: 11px; margin-bottom: 12px; }
+.admin-person-contacts dt svg { width: 15px; height: 15px; }
+.admin-person-contacts dd { margin: 0; color: #dce9fa; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.admin-person-contacts dd.is-empty { color: #718daf; }
+.admin-person-contacts__time time { display: block; color: #49d4ff; font-size: 24px; font-weight: 600; letter-spacing: 1px; line-height: 1; font-variant-numeric: tabular-nums; }
+.admin-person-contacts__time dd > span { display: block; font-size: 11px; margin-top: 11px; }
+.admin-person-contacts__time small { display: block; color: #7f9fc4; font-size: 9px; margin-top: 3px; }
+.admin-profile-editor label small { color: #7897bd; font-size: 9px; font-weight: 400; margin-left: 5px; }
+.admin-private-note .admin-panel__heading { align-items: center; gap: 15px; }
+.admin-private-note .admin-panel__heading p { color: #7999bf; font-size: 10px; margin: 8px 0 0; }
+.admin-private-note .admin-panel__heading .admin-text-button { font-size: 11px; flex: 0 0 auto; }
+.admin-private-note__text { white-space: pre-wrap; overflow-wrap: anywhere; color: #c3d4eb; font-size: 13px; line-height: 1.8; margin: 19px 0 0; }
+.admin-private-note__empty { color: #7897bc; font-size: 12px; line-height: 1.7; margin: 17px 0 0; }
+.admin-private-note textarea { display: block; width: 100%; min-width: 0; margin-top: 18px; min-height: 130px; padding: 12px 13px; border: 1px solid #194775; border-radius: 8px; background: #05152f; color: #d6e6fa; font: inherit; font-size: 13px; line-height: 1.7; resize: vertical; }
+.admin-private-note__actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 13px; }
+.admin-private-note__actions .employee-button { min-height: 40px; font-size: 11px; padding: 9px 13px; }
+.admin-private-note__actions > span { margin-left: auto; color: #7897bc; font-size: 10px; }
+.admin-people-stats { margin-bottom: 22px; }
+.admin-people-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.admin-people-primary { min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+.admin-people-side { min-width: 0; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 18px; }
+.admin-people-side .admin-task-editor { position: static; }
+.admin-person-load__ring { width: 156px; height: 156px; margin: 23px auto; padding: 12px; border-radius: 50%; }
+.admin-person-load__ring > div { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border-radius: 50%; background: #031129; }
+.admin-person-load__ring strong { color: #f1f7ff; font-size: 35px; letter-spacing: -1px; }
+.admin-person-load__ring span { color: #91afd4; font-size: 10px; }
+.admin-person-load dl { margin: 0; }
+.admin-person-load dl > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 15px; font-size: 12px; }
+.admin-person-load dt { display: flex; align-items: center; gap: 8px; color: #a0b9da; }
+.admin-person-load dd { margin: 0; color: #deebfb; font-variant-numeric: tabular-nums; }
+.admin-person-load dt i { width: 8px; height: 8px; border-radius: 2px; background: #00c8ff; }
+.admin-person-load dl > div:nth-child(2) i { background: #ff4965; }
+.admin-person-load dl > div:last-child { border-top: 1px solid #153755; padding-top: 16px; margin-top: 18px; font-size: 11px; }
+.admin-person-rating > div { display: flex; align-items: center; gap: 9px; }
+.admin-person-rating svg { width: 20px; height: 20px; color: #00c8ff; }
+.admin-person-rating h2 { margin: 0; font-size: 14px; }
+.admin-person-rating > strong { display: block; margin: 18px 0 8px; font-size: 32px; }
+.admin-person-rating p { color: #7f9fc5; margin: 0; font-size: 10px; line-height: 1.7; }
+.admin-person-nearest > p { color: #c4a66b; font-size: 9px; letter-spacing: 1.2px; margin: 0 0 13px; }
+.admin-person-nearest { border-color: #775d2a70; }
+.admin-person-nearest > .admin-task-outcome { display: flex; margin-top: 17px; color: #f4c771; }
+.admin-person-nearest > span:last-child { display: block; color: #8daace; font-size: 10px; margin-top: 12px; }
+.admin-people-tasks .admin-task-table { min-width: 650px; }
+@media (max-width: 1200px) {
+  .admin-person-contacts dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 0; }
+  .admin-person-contacts dl > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .admin-people-hero__actions { width: 100%; padding-top: 3px; }
+  .admin-people-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-people-side { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-people-grid.has-editor > .admin-people-side { grid-row: 1; grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .admin-person-contacts { padding: 19px; }
+  .admin-person-contacts dl { grid-template-columns: minmax(0, 1fr); gap: 17px; }
+  .admin-person-contacts dl > div { padding: 0 0 17px; border-left: 0; border-bottom: 1px solid #163a5b; }
+  .admin-person-contacts dl > div:last-child { padding: 0; border-bottom: 0; }
+  .admin-person-contacts dt { margin-bottom: 7px; }
+  .admin-private-note .admin-panel__heading { flex-wrap: wrap; }
+  .admin-people-summary { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .admin-people-summary > div { min-height: 78px; padding: 17px; gap: 15px; }
+  .admin-people-summary > div > span { flex: 1; flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; font-size: 11px; }
+  .admin-people-summary strong { font-size: 25px; }
+  .admin-people-directory { padding: 18px 13px; }
+  .admin-people-hero { padding: 19px; gap: 15px; }
+  .admin-people-hero > .admin-avatar { width: 54px; height: 54px; font-size: 19px; }
+  .admin-people-hero__name h2 { font-size: 24px; }
+  .admin-people-hero__name > span { font-size: 12px; }
+  .admin-people-hero__actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
+  .admin-people-hero__actions .employee-button { width: 100%; justify-content: center; }
+  .admin-people-side { grid-template-columns: minmax(0, 1fr); }
+  .admin-people-back { flex-wrap: wrap; gap: 5px; font-size: 11px; }
+  .admin-people-back > span { overflow-wrap: anywhere; }
+}
