@@ -41,7 +41,8 @@ class TaskUpdateSchema(BaseModel):
   description: str | None = Field(default=None, max_length=2000)
   priority: priorities | None = None
   deadline: datetime | None = None
-  completed_at: datetime | None = None
+
+
 
 
 

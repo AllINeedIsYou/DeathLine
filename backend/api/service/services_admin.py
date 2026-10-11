@@ -32,9 +32,18 @@ def task_editing(session: SessionDep, task_id:int, task_data:TaskUpdateSchema):
     task = session.query(Tasks).filter(Tasks.id == task_id).first()
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
+    if task.completed_at is not None:
+        raise HTTPException(status_code=400, detail="Task already completed")
 
     # получаем словарь из данных, отбрасывая непереданные (None) поля
     update_data = task_data.model_dump(exclude_unset=True)
+
+    for field in ("title", "priority", "deadline"):
+        if field in update_data and update_data[field] is None:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Поле {field} нельзя передать как null"
+            )
 
     # key столбец  value новое значение
     for key, value in update_data.items(): #.item как раз и берет парам столбец|новое значение
