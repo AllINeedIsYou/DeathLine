@@ -1,9 +1,9 @@
 from enum import Enum
 from datetime import datetime
 from sqlalchemy import DateTime, String, ForeignKey,func
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 from DataBase.database import Base
+
 
 class Workers(Base):
     __tablename__ = 'Workers'
@@ -18,7 +18,6 @@ class Workers(Base):
 
     task:Mapped[str|None]=mapped_column(String(1000),nullable=True)
 
-    #deadline_point:Mapped[int|None]=mapped_column(default=None,nullable=True)
 
 class priorities(Enum):
     high='high'
@@ -45,3 +44,26 @@ class Tasks(Base):
     completed_at:Mapped[datetime|None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
     updated_at:Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)
+
+class Users(Base):
+    __tablename__ = 'Users'
+
+    id:Mapped[int]=mapped_column(primary_key=True)
+
+    name:Mapped[str]=mapped_column(String(80),nullable=False)
+
+    username:Mapped[str]=mapped_column(String(40),nullable=False,unique=True)
+
+    email:Mapped[str]=mapped_column(String(254),nullable=False,unique=True)
+
+    password_hash:Mapped[str]=mapped_column(String(255),nullable=False)
+
+    email_verified_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True),nullable=True,default=None)
+
+    phone:Mapped[str|None]=mapped_column(nullable=True)
+
+    telegram:Mapped[str|None]=mapped_column(String(33),nullable=True)
+
+    timezone:Mapped[str]=mapped_column(String(40),nullable=False)
+
+    created_at:Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)

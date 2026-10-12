@@ -1,8 +1,9 @@
+
 from fastapi import APIRouter
 from DataBase.database import Base, engine
 
 
-service_router=APIRouter(prefix='/service')
+service_router=APIRouter(prefix='/service',tags=['service'])
 
 @service_router.post('/reset_db')
 def reset_database():
@@ -10,4 +11,5 @@ def reset_database():
     Base.metadata.create_all(bind=engine)
 
     return {"message": "База данных сброшена!"}
+
 
