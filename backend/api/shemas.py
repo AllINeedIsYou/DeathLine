@@ -2,28 +2,13 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import datetime
 from DataBase.models import priorities
 from pydantic_extra_types.phone_numbers import PhoneNumber
-
-class WorkerCreateSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    name: str
-    role: str
-    tg: str|None=None
-
-class WorkerResponseSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    name: str
-    role: str
-    tg: str|None=None
-    task: str|None = None
-    #deadline_point: int | None = None
+from pydantic import field_validator
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 class TaskCreateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    worker_id:int
+    user_id:int
     title: str = Field(max_length=120,min_length=1)
     description: str|None = Field(max_length=2000,default=None)
     priority: priorities
@@ -53,7 +38,18 @@ class UserCreateSchema(BaseModel):
     password: str=Field(max_length=128,min_length=8)
     phone:PhoneNumber|None=None
     telegram:str|None=Field(default=None, max_length=33,min_length=1,description='@username')
-    timezone:str
+    timezone: str = Field(min_length=1, max_length=40)
+    @field_validator('timezone')
+    @classmethod
+    def timezone_validator(cls, value:str):
+        try:
+            ZoneInfo(value)
+
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError("Укажи существующий часовой пояс")
+        return value
+
+
 
 class UserResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -68,7 +64,9 @@ class UserResponseSchema(BaseModel):
     created_at: datetime
     email_verified_at:datetime|None=None
 
-
+class UserLoginSchema(BaseModel):
+    username: str = Field(min_length=1, max_length=40)
+    password: str = Field(min_length=1, max_length=128)
 
 
 

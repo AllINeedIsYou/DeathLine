@@ -1,5 +1,5 @@
 from DataBase.database import SessionDep
-from DataBase.models import Workers,Tasks
+from DataBase.models import Tasks,Users,UserSessions
 from fastapi import HTTPException
 from datetime import datetime,timezone
 
@@ -9,9 +9,9 @@ from api.shemas import TaskCreateSchema,TaskUpdateSchema
 def add_task(session: SessionDep, task_data:TaskCreateSchema):
     now = datetime.now(timezone.utc)
 
-    worker = session.query(Workers).filter(Workers.id == task_data.worker_id).first()
-    if worker is None:
-        raise HTTPException(status_code=404, detail="Worker not found")
+    user = session.query(Users).filter(Users.id == task_data.user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
     #херачим в списк
     task_dict = task_data.model_dump()
@@ -32,14 +32,14 @@ def add_task(session: SessionDep, task_data:TaskCreateSchema):
     return new_task
 
 #функция для возвращения всех задач конкретного работника
-def find_task_for_id(session: SessionDep, worker_id:int):
-    worker=session.query(Workers).filter(Workers.id == worker_id).first()
+def find_task_for_id(session: SessionDep, user_id:int):
+    user=session.query(Users).filter(Users.id == user_id).first()
 
-    if worker is None:
-        raise HTTPException(status_code=404, detail="The employee not found.")
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    employee_tasks=session.query(Tasks).filter(Tasks.worker_id == worker_id).all()
-    return employee_tasks
+    user_tasks=session.query(Tasks).filter(Tasks.user_id == user_id).all()
+    return user_tasks
 
 #функция изменения задачи
 def task_editing(session: SessionDep, task_id:int, task_data:TaskUpdateSchema):
