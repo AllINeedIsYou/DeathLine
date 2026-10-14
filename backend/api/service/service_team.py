@@ -145,3 +145,10 @@ def find_task_for_id(session: SessionDep, user_id:int, team_id:int):
     member=get_team_member(session,team_id,user_id)
     task=session.query(Tasks).filter(Tasks.team_id==member.team_id,Tasks.user_id == member.user_id).all()
     return task
+
+def get_task_for_user(session: SessionDep, user_id:int, team_id:int,task_id:int):
+    task = find_only_task(session,task_id,team_id)
+    member=get_team_member(session,team_id,user_id)
+    if task.user_id != member.user_id and member.role!=TeamRole.admin:
+        raise HTTPException(status_code=403)
+    return task

@@ -8,7 +8,7 @@ from .dependencies import get_current_user,get_current_team_admin
 from .shemas import TeamResponseSchema, TeamCreateSchema, TeamMemberResponseSchema, TaskCreateSchema, \
     TaskResponseSchema, TaskUpdateSchema
 from .service.service_team import create_team, get_user_teams, get_team_members, add_task, get_team_tasks, \
-    find_only_task, task_editing, complete_task, find_task_for_id
+     task_editing, complete_task, find_task_for_id,get_task_for_user
 
 teams_router = APIRouter(prefix="/teams",tags=["Teams"])
 
@@ -34,8 +34,8 @@ def get_tasks(session:SessionDep,member: TeamMembers = Depends(get_current_team_
     return get_team_tasks(session=session,team_id=member.team_id)
 
 @teams_router.get('/{team_id}/tasks/{task_id}',summary="Возвращение конкретной задачи",response_model=TaskResponseSchema)
-def get_task(session:SessionDep,task_id:int,member: TeamMembers = Depends(get_current_team_admin)):
-    return find_only_task(session=session,task_id=task_id,team_id=member.team_id)
+def get_task(session:SessionDep,task_id:int,team_id:int,user: Users = Depends(get_current_user)):
+    return get_task_for_user(session=session,task_id=task_id,user_id=user.id,team_id=team_id)
 
 
 @teams_router.patch('/{team_id}/tasks/{task_id}',summary='Изменение конкретной задачи',response_model=TaskResponseSchema)
