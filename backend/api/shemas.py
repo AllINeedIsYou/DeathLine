@@ -1,9 +1,10 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import datetime
-from DataBase.models import priorities
+from DataBase.models import priorities, TeamRole
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic import field_validator
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+#=========================================================
 
 class TaskCreateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -22,12 +23,15 @@ class TaskResponseSchema(TaskCreateSchema):
     created_at: datetime
     completed_at: datetime|None=Field(default=None)
     updated_at: datetime
+    team_id:int
 
 class TaskUpdateSchema(BaseModel):
   title: str | None = Field(default=None, max_length=120, min_length=1)
   description: str | None = Field(default=None, max_length=2000)
   priority: priorities | None = None
   deadline: datetime | None = None
+
+#=========================================================
 
 class UserCreateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -49,8 +53,6 @@ class UserCreateSchema(BaseModel):
             raise ValueError("Укажи существующий часовой пояс")
         return value
 
-
-
 class UserResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -67,8 +69,24 @@ class UserResponseSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     username: str = Field(min_length=1, max_length=40)
     password: str = Field(min_length=1, max_length=128)
+#=========================================================
 
+class TeamCreateSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True,str_strip_whitespace=True)
+    name:str= Field(max_length=120, min_length=1)
 
+class TeamResponseSchema(TeamCreateSchema):
+    model_config = ConfigDict(from_attributes=True)
+    id:int
+    created_at: datetime
+
+class TeamMemberResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id:int
+    team_id:int
+    joined_at: datetime
+    role: TeamRole
+    user:UserResponseSchema
 
 
 

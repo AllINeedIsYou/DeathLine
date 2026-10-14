@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from DataBase.database import Base, engine
 
 
-service_router=APIRouter(prefix='/service',tags=['service'])
+service_router=APIRouter(prefix='/service',tags=['Service'])
 
 @service_router.post('/reset_db')
 def reset_database():
