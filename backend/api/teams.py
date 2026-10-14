@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends
 
 from DataBase.database import SessionDep
 from DataBase.models import Users,TeamMembers
-
-
 from .dependencies import get_current_user,get_current_team_admin
+
 from .shemas import TeamResponseSchema, TeamCreateSchema, TeamMemberResponseSchema, TaskCreateSchema, \
-    TaskResponseSchema, TaskUpdateSchema
+    TaskResponseSchema, TaskUpdateSchema,MyTeamResponseSchema,TeamInvitationLinkResponseSchema,TeamInvitationCreateSchema,TeamInvitationListItemSchema,TeamInvitationPreviewSchema
+
 from .service.service_team import create_team, get_user_teams, get_team_members, add_task, get_team_tasks, \
      task_editing, complete_task, find_task_for_id,get_task_for_user
+from .service.service_invitations import create_team_invitation, get_team_invitations, revoke_team_invitation
 
 teams_router = APIRouter(prefix="/teams",tags=["Teams"])
 
@@ -16,7 +17,7 @@ teams_router = APIRouter(prefix="/teams",tags=["Teams"])
 def team(session:SessionDep,team_data:TeamCreateSchema,user: Users = Depends(get_current_user)):
     return create_team(session=session,team_data=team_data,creator_id=user.id)
 
-@teams_router.get('',response_model=list[TeamResponseSchema],summary="Вернуть командлу")
+@teams_router.get('',response_model=list[MyTeamResponseSchema],summary="Вернуть команды")
 def get_team(session:SessionDep,user:Users = Depends(get_current_user)):
     return get_user_teams(session=session,user_id=user.id)
 
@@ -51,3 +52,20 @@ def complete_task_by_id(session:SessionDep,team_id:int, task_id:int,user: Users 
 @teams_router.get('/{team_id}/my-tasks',summary="Возвращение всех задач конкретного работника",response_model=list[TaskResponseSchema])
 def get_task_by_id(session:SessionDep,team_id:int,user: Users = Depends(get_current_user)):
     return find_task_for_id(session=session,user_id=user.id,team_id=team_id)
+
+@teams_router.post('/{team_id}/invitations',response_model=TeamInvitationLinkResponseSchema,status_code=201,summary='Приглашение по ссылке')
+def invite_in_team(session:SessionDep,team_data:TeamInvitationCreateSchema,member: TeamMembers = Depends(get_current_team_admin)):
+    invation,token=create_team_invitation(session=session,team_data=team_data,team_id=member.team_id,creator_id=member.user_id)
+    invite_url=f'http://127.0.0.1:5173/invite/{token}'
+
+    return TeamInvitationLinkResponseSchema(
+        invitation=invation,
+        invite_url=invite_url
+    )
+@teams_router.get('/{team_id}/invitations',response_model=list[TeamInvitationListItemSchema])
+def get_all_invitations(session:SessionDep,member: TeamMembers = Depends(get_current_team_admin)):
+    return get_team_invitations(session=session,team_id=member.team_id)
+
+@teams_router.delete('/{team_id}/invitations/{invitation_id}',status_code=204)
+def del_invite(session:SessionDep,invitation_id:int,member:TeamMembers=Depends(get_current_team_admin)):
+    revoke_team_invitation(session=session,team_id=member.team_id,invitation_id=invitation_id)

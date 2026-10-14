@@ -79,15 +79,54 @@ class TeamResponseSchema(TeamCreateSchema):
     model_config = ConfigDict(from_attributes=True)
     id:int
     created_at: datetime
+    #name
 
 class TeamMemberResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
     id:int
     team_id:int
     joined_at: datetime
     role: TeamRole
     user:UserResponseSchema
 
+class MyTeamResponseSchema(TeamResponseSchema):
+    model_config = ConfigDict(from_attributes=True)
 
+    role:TeamRole
+    #id
+    #name
+    #created_at
+
+class TeamInvitationCreateSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    email:EmailStr
+    role:TeamRole= Field(default=TeamRole.employee)
+
+class TeamInvitationResponseSchema(TeamInvitationCreateSchema):
+    model_config = ConfigDict(from_attributes=True)
+    id:int
+    team_id:int
+    created_by: int
+    created_at: datetime
+    expires_at: datetime
+    accepted_at:datetime|None=None
+    revoked_at:datetime|None=None
+
+class TeamInvitationLinkResponseSchema(BaseModel):
+    invitation:TeamInvitationResponseSchema
+    invite_url:str
+
+class TeamInvitationListItemSchema(TeamInvitationResponseSchema):
+    status:str
+
+class TeamInvitationPreviewSchema(BaseModel):
+    team_id:int
+    team_name:str
+    email:EmailStr
+    role:TeamRole
+    expires_at: datetime
+    status:str
 
 

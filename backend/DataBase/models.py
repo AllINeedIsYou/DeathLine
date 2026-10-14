@@ -95,6 +95,28 @@ class Tasks(Base):
 
     updated_at:Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)
 
+class TeamInvitations(Base):
+    __tablename__ = 'TeamInvitations'
+
+    id:Mapped[int]=mapped_column(primary_key=True)
+
+    team_id:Mapped[int]=mapped_column(ForeignKey(Teams.id),nullable=False)
+
+    created_by:Mapped[int]=mapped_column(ForeignKey(Users.id),nullable=False)
+
+    email:Mapped[str]=mapped_column(String(254),nullable=False)
+
+    role:Mapped[TeamRole]=mapped_column(nullable=False)
+
+    token_hash:Mapped[str]=mapped_column(String(64),nullable=False,unique=True)
+
+    created_at:Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    expires_at:Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    accepted_at:Mapped[datetime|None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
+    revoked_at:Mapped[datetime|None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 

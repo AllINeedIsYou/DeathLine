@@ -1,7 +1,8 @@
-from datetime import datetime,timezone
+from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
 from DataBase.database import SessionDep
-from api.shemas import TeamCreateSchema, TeamMemberResponseSchema, TaskCreateSchema, TaskUpdateSchema
+from api.shemas import TeamCreateSchema, TeamMemberResponseSchema, TaskCreateSchema, TaskUpdateSchema, \
+    MyTeamResponseSchema
 from DataBase.models import Teams, TeamMembers, TeamRole, Users, Tasks
 from fastapi import HTTPException
 
@@ -23,23 +24,35 @@ def create_team(session:SessionDep,team_data:TeamCreateSchema,creator_id:int):
 
     session.refresh(new_team)
     return new_team
-
+#мы получаем все команды в который состоит юзер(user_id)
 def get_user_teams(session:SessionDep,user_id:int):
-    query=session.query(Teams).join(TeamMembers,Teams.id==TeamMembers.team_id).filter(TeamMembers.user_id == user_id).all()
-    return query
+    query=session.query(Teams,TeamMembers).join(TeamMembers,Teams.id==TeamMembers.team_id).filter(TeamMembers.user_id == user_id).all()
 
+    teamsresult=[]
+    for team,member in query:
+        myteam=MyTeamResponseSchema(
+            id=team.id,
+            name=team.name,
+            role=member.role,
+            created_at=team.created_at,
+        )
+        teamsresult.append(myteam)
+    return teamsresult
+
+#получаем таблицу TeamMembers по id команды и пользователя, id пользователя берем из ссесии
+#проверям есть ли вообще доступ к команде, т.е состиоит ли пользователь в команде
 def get_team_member(session:SessionDep,team_id:int,user_id:int):
     members=session.query(TeamMembers).filter(TeamMembers.team_id == team_id,TeamMembers.user_id == user_id).first()
     if members is None:
         raise HTTPException(status_code=403,detail="Нет доступа к команде")
     return members
-
+#да, окей в команде состоит, а права админа есть для получения таблицы TeamMembers?
 def require_team_admin(session:SessionDep,team_id:int,user_id:int):
     members=get_team_member(session,team_id,user_id)
     if members.role != TeamRole.admin:
         raise HTTPException(status_code=403,detail='Требуются права администратора')
     return members
-
+#получаем всех юзеров которые находятся в команде
 def get_team_members(session:SessionDep,team_id:int):
     members=session.query(TeamMembers,Users).join(Users, TeamMembers.user_id == Users.id).filter(TeamMembers.team_id == team_id).all()
     result=[]
@@ -82,12 +95,12 @@ def add_task(session: SessionDep, task_data:TaskCreateSchema,team_id:int):
     session.commit()
     session.refresh(new_task)
     return new_task
-
+#Получаем ВСЕ задачи команды
 def get_team_tasks(session:SessionDep,team_id:int):
     tasks=session.query(Tasks).filter(Tasks.team_id == team_id).all()
     return tasks
 
-
+#Получаем конкретную задачу, в конкертной команде
 def find_only_task(session: SessionDep, task_id:int, team_id:int):
     task = session.query(Tasks).filter(Tasks.id == task_id, Tasks.team_id==team_id).first()
     if task is None:
@@ -145,7 +158,7 @@ def find_task_for_id(session: SessionDep, user_id:int, team_id:int):
     member=get_team_member(session,team_id,user_id)
     task=session.query(Tasks).filter(Tasks.team_id==member.team_id,Tasks.user_id == member.user_id).all()
     return task
-
+#Возвращает конкретную задачу конкретного пользователя (для админа)
 def get_task_for_user(session: SessionDep, user_id:int, team_id:int,task_id:int):
     task = find_only_task(session,task_id,team_id)
     member=get_team_member(session,team_id,user_id)

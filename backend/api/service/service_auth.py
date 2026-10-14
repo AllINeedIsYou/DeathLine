@@ -10,7 +10,7 @@ import secrets
 import hashlib
 
 hasher = PasswordHash.recommended()
-#функция кеширования
+#функция хеширования
 def hash_password(password:str):
     return hasher.hash(password)
 #функция проверки пароля(при входе в аккаунт) сравнивается введенный пароль с тем хешем пароля который уже хранитсья в бд
