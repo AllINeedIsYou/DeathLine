@@ -129,4 +129,7 @@ class TeamInvitationPreviewSchema(BaseModel):
     expires_at: datetime
     status:str
 
+class EmailVerificationConfirmSchema(BaseModel):
+    token:str=Field(min_length=1)
+
 

@@ -118,5 +118,25 @@ class TeamInvitations(Base):
 
     revoked_at:Mapped[datetime|None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
+class EmailVerificationTokens(Base):
+    __tablename__ = 'EmailVerificationTokens'
+
+    id:Mapped[int]=mapped_column(primary_key=True)
+
+    user_id:Mapped[int]=mapped_column(ForeignKey(Users.id), nullable=False)
+
+    email:Mapped[str]=mapped_column(String(254),nullable=False)
+
+    token_hash:Mapped[str]=mapped_column(String(64), unique=True, nullable=False)
+
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),nullable=False)
+
+    expires_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),nullable=False)
+
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
+
 
 

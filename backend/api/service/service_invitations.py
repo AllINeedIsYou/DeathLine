@@ -1,14 +1,14 @@
 import hashlib
 import secrets
 from datetime import datetime, timezone, timedelta
-from idlelib import query
+
 
 from sqlalchemy.exc import IntegrityError
 from DataBase.database import SessionDep
 from api.shemas import TeamInvitationCreateSchema, TeamInvitationListItemSchema, TeamInvitationPreviewSchema
 from DataBase.models import Teams, TeamMembers, Users, TeamInvitations
 from fastapi import HTTPException
-
+#создания токена и приглашения полтзователя по email
 def create_team_invitation(session: SessionDep, team_data:TeamInvitationCreateSchema,team_id:int,creator_id:int):
     now=datetime.now(timezone.utc)
     team_email=session.query(TeamMembers).join(Users, TeamMembers.user_id == Users.id).filter(Users.email == team_data.email,TeamMembers.team_id==team_id).first()
@@ -41,7 +41,7 @@ def create_team_invitation(session: SessionDep, team_data:TeamInvitationCreateSc
 
     session.refresh(Invite)
     return Invite,token
-
+#проверяем статус
 def get_invitation_status(invitation: TeamInvitations):
     if invitation.accepted_at is not None:
         return 'accepted'
@@ -51,6 +51,7 @@ def get_invitation_status(invitation: TeamInvitations):
         return 'expired'
     else:
         return 'pending'
+# получаем все заявки команды ||||||| order_by(TeamInvitations.created_at.desc()) фильтрует по дате создание от большего к меньшему
 def get_team_invitations(session: SessionDep, team_id:int):
     invitions=session.query(TeamInvitations).filter(TeamInvitations.team_id==team_id).order_by(TeamInvitations.created_at.desc()).all()
     all_invitions=[]
@@ -69,7 +70,7 @@ def get_team_invitations(session: SessionDep, team_id:int):
         )
         all_invitions.append(inv)
     return all_invitions
-
+# поиск приглашения в определеной команде по id приглоса
 def find_team_invitation(session: SessionDep, team_id:int, invitation_id:int,lock:bool=False):
     query=session.query(TeamInvitations).filter(TeamInvitations.team_id==team_id,TeamInvitations.id==invitation_id)
 
@@ -82,7 +83,7 @@ def find_team_invitation(session: SessionDep, team_id:int, invitation_id:int,loc
         raise HTTPException(status_code=404,detail='Приглашение не найдено')
 
     return invite_team
-
+#отменяет заявку
 def revoke_team_invitation(session: SessionDep, team_id:int, invitation_id:int):
     invite_team=find_team_invitation(session,team_id,invitation_id,lock=True)
     status=get_invitation_status(invite_team)
@@ -95,7 +96,7 @@ def revoke_team_invitation(session: SessionDep, team_id:int, invitation_id:int):
         return invite_team
     if status=='revoked':
         return invite_team
-
+#поиск заявки по токену
 def find_invitation_by_token(session: SessionDep, token:str, lock:bool=False):
     token_hash=hashlib.sha256(token.encode()).hexdigest()
 
@@ -107,23 +108,23 @@ def find_invitation_by_token(session: SessionDep, token:str, lock:bool=False):
     if finde_token is None:
         raise HTTPException(status_code=404,detail='Приглашение не найдено')
     return finde_token
-
+#получаем имя команды, куда вствупает пользовтель по токену + формируем форму ответа(preview)
 def get_invitation_preview(session:SessionDep,token:str):
-    finde_token=find_invitation_by_token(session, token)
-    team_name=session.query(Teams).filter(Teams.id==finde_token.team_id).first()
+    find_token=find_invitation_by_token(session, token)
+    team_name=session.query(Teams).filter(Teams.id==find_token.team_id).first()
     if team_name is None:
         raise HTTPException(status_code=404)
 
     preview=TeamInvitationPreviewSchema(
-        team_id=finde_token.team_id,
+        team_id=find_token.team_id,
         team_name=team_name.name,
-        email=finde_token.email,
-        role=finde_token.role,
-        expires_at=finde_token.expires_at,
-        status=get_invitation_status(finde_token)
+        email=find_token.email,
+        role=find_token.role,
+        expires_at=find_token.expires_at,
+        status=get_invitation_status(find_token)
     )
     return preview
-
+#проверяем сопадает ли email юзера и email указанный в приглосе
 def check_invitation_for_user(invitation,user):
     if get_invitation_status(invitation) != 'pending':
         raise HTTPException(status_code=409)
@@ -132,7 +133,7 @@ def check_invitation_for_user(invitation,user):
     if user.email_verified_at is None:
         raise HTTPException(status_code=403, detail="Подтвердите почту")
     return invitation
-
+#потверждение пришглоса и добавления пользователя в комнаду бд(TeamMembers)
 def accept_team_invitation(session:SessionDep,token:str,user):
     find_token=find_invitation_by_token(session, token,lock=True)
 

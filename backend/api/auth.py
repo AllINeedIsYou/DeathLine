@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Response,Request,Depends
-from .shemas import UserCreateSchema,UserResponseSchema,UserLoginSchema
+from .shemas import UserCreateSchema,UserResponseSchema,UserLoginSchema,EmailVerificationConfirmSchema
 from .service.service_auth import register_user,authenticate_user,create_session,get_user_by_session,delete_session
 from DataBase.database import SessionDep
 from .dependencies import get_current_user
 from DataBase.models import Users
-
+from .service.service_email_verification import confirm_email
 auth_router = APIRouter(prefix='/auth', tags=['Auth'])
 
 @auth_router.post('/register', response_model=UserResponseSchema, summary='Регистарция',status_code=201)
@@ -39,3 +39,7 @@ def logout(session:SessionDep, response:Response,request: Request):
     return
 
 
+@auth_router.post('/verify-email',response_model=UserResponseSchema)
+def email_confirm(session:SessionDep, data:EmailVerificationConfirmSchema):
+    user=confirm_email(session,data.token)
+    return user
