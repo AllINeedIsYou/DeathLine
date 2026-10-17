@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">DeathLine — задачи, команда, время</title>
+  <desc id="description">Тёмная обложка с голубым логотипом DeathLine и циферблатом. Сроки, ответственность и результат — на одном экране.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1280" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071529"/>
+      <stop offset="1" stop-color="#020817"/>
+    </linearGradient>
+    <radialGradient id="light" cx="0" cy="0" r="1" gradientTransform="translate(1042 204) rotate(90) scale(295 400)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00C8F0" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#00C8F0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="arc" x1="920" y1="108" x2="1100" y2="296" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00D7F5"/>
+      <stop offset="1" stop-color="#0672A7"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" stroke="#19324D" stroke-opacity=".26"/>
+    </pattern>
+  </defs>
+  <rect x="1" y="1" width="1278" height="418" rx="26" fill="url(#background)"/>
+  <rect x="1" y="1" width="1278" height="418" rx="26" fill="url(#light)"/>
+  <path d="M747 1H1253C1267 1 1279 13 1279 27V393C1279 407 1267 419 1253 419H747V1Z" fill="url(#grid)"/>
+  <rect x="1" y="1" width="1278" height="418" rx="26" stroke="#17334E" stroke-width="2"/>
+  <rect x="64" y="65" width="7" height="7" rx="2" fill="#00C9F3"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="84" y="75" fill="#8EADC8" font-size="13" font-weight="600" letter-spacing="2.2">УПРАВЛЕНИЕ ЗАДАЧАМИ И ДЕДЛАЙНАМИ</text>
+    <text x="60" y="177" fill="#EDF3FF" font-size="91" font-weight="800" letter-spacing="-4">Death</text>
+    <text x="290" y="177" fill="#00C9F3" font-size="91" font-weight="800" letter-spacing="-4">Line.</text>
+    <text x="65" y="234" fill="#E2EBF8" font-size="29" font-weight="600">Задачи. Команда. Время.</text>
+    <text x="65" y="273" fill="#8EA8C3" font-size="18">Сроки, ответственность и результат — на одном экране.</text>
+    <g font-size="12" font-weight="700" letter-spacing="1.3" text-anchor="middle">
+      <rect x="65" y="319" width="98" height="32" rx="8" fill="#092035" stroke="#19415C"/>
+      <text x="114" y="339" fill="#A4DFF0">PYTHON</text>
+      <rect x="174" y="319" width="100" height="32" rx="8" fill="#092035" stroke="#19415C"/>
+      <text x="224" y="339" fill="#A4DFF0">FASTAPI</text>
+      <rect x="285" y="319" width="89" height="32" rx="8" fill="#092035" stroke="#19415C"/>
+      <text x="329.5" y="339" fill="#A4DFF0">REACT</text>
+      <rect x="385" y="319" width="138" height="32" rx="8" fill="#092035" stroke="#19415C"/>
+      <text x="454" y="339" fill="#A4DFF0">TYPESCRIPT</text>
+    </g>
+    <path d="M776 72V348" stroke="#18364F"/>
+    <circle cx="1015" cy="202" r="115" stroke="#12354D" stroke-dasharray="3 9"/>
+    <circle cx="1015" cy="202" r="94" fill="#06172A" stroke="#173951" stroke-width="9"/>
+    <circle cx="1015" cy="202" r="94" stroke="url(#arc)" stroke-width="9" stroke-linecap="round" stroke-dasharray="455 591" transform="rotate(-90 1015 202)"/>
+    <g stroke="#63839F" stroke-width="2" stroke-linecap="round">
+      <path d="M1015 126V135M1091 202H1082M1015 278V269M939 202H948"/>
+      <path d="M1053 136L1049 144M1081 164L1073 168M1081 240L1073 236M1053 268L1049 260M977 268L981 260M949 240L957 236M949 164L957 168M977 136L981 144" opacity=".5"/>
+    </g>
+    <path d="M1015 151V202L1056 225" stroke="#D8F5FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="1015" cy="202" r="7" fill="#00C9F3"/>
+    <rect x="898" y="319" width="234" height="32" rx="16" fill="#072F35" stroke="#125D60"/>
+    <circle cx="921" cy="335" r="4" fill="#00D2AF"/>
+    <text x="1034" y="340" fill="#83DDD0" font-size="12" font-weight="700" letter-spacing="1.7" text-anchor="middle">ВРЕМЯ ДЕЙСТВОВАТЬ</text>
+  </g>
+</svg>
