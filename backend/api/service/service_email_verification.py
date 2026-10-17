@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone, timedelta
 from DataBase.database import SessionDep
 from DataBase.models import EmailVerificationTokens, Users
-
+from smtplib import SMTPException
 
 def create_email_verification_token(session:SessionDep,user):
     find_user=session.query(Users).filter(Users.id == user.id).populate_existing().with_for_update().first()
@@ -19,6 +19,11 @@ def create_email_verification_token(session:SessionDep,user):
 
     if find_user.email_verified_at is not None:
         raise HTTPException(status_code=409, detail='Почта уже подтверждена')
+
+    time_send=session.query(EmailVerificationTokens).filter(EmailVerificationTokens.user_id==user.id).order_by(EmailVerificationTokens.created_at.desc()).first()
+    if (time_send is not None) and  (time_send.created_at + timedelta(seconds=60) > now):
+        raise HTTPException(status_code=429,detail='Повторную отправку можно запросить через минуту.')
+
     try:
         for old_token in old_tokens:
             old_token.revoked_at = now
@@ -95,6 +100,15 @@ def send_verification_email(user, token):
     text=f'Ваша ссылка на подтверждение:\n {verification_url}\n Ссылка активна 24 часа'
     message=build_email_message(user.email,subject,text)
     send_email(message)
+
+def request_email_verification(session:SessionDep,user):
+    new_EmailVerification, token=create_email_verification_token(session, user)
+    try:
+        send_verification_email(user,token)
+    except(SMTPException,OSError) as error:
+        print(type(error).__name__)
+        raise HTTPException(status_code=503,detail='Не удалось отправить письмо. Попробуйте позже.')
+
 
 
 

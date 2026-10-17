@@ -1,15 +1,29 @@
-from fastapi import APIRouter, Response,Request,Depends
-from .shemas import UserCreateSchema,UserResponseSchema,UserLoginSchema,EmailVerificationConfirmSchema
+
+from fastapi import APIRouter, Response,Request,Depends,HTTPException
+from .shemas import UserCreateSchema,UserResponseSchema,UserLoginSchema,EmailVerificationConfirmSchema,UserRegistrationResponseSchema
 from .service.service_auth import register_user,authenticate_user,create_session,get_user_by_session,delete_session
 from DataBase.database import SessionDep
 from .dependencies import get_current_user
 from DataBase.models import Users
-from .service.service_email_verification import confirm_email
+from .service.service_email_verification import confirm_email,request_email_verification
+
 auth_router = APIRouter(prefix='/auth', tags=['Auth'])
 
-@auth_router.post('/register', response_model=UserResponseSchema, summary='Регистарция',status_code=201)
+@auth_router.post('/register', response_model=UserRegistrationResponseSchema, summary='Регистарция',status_code=201)
 def register_new_user(session:SessionDep, user_data:UserCreateSchema):
-    return register_user(session=session,user_data=user_data)
+    user=register_user(session=session,user_data=user_data)
+
+    try:
+        request_email_verification(session, user)
+        verification_email_sent=True
+    except HTTPException as error:
+        if error.status_code==503:
+            verification_email_sent = False
+        else:
+            raise
+    user_response=UserRegistrationResponseSchema(**UserResponseSchema.model_validate(user).model_dump(),verification_email_sent=verification_email_sent)
+    return user_response
+
 
 @auth_router.post('/login', response_model=UserResponseSchema, summary='Вход')
 def login(session:SessionDep, user_data:UserLoginSchema, response:Response):
@@ -43,3 +57,7 @@ def logout(session:SessionDep, response:Response,request: Request):
 def email_confirm(session:SessionDep, data:EmailVerificationConfirmSchema):
     user=confirm_email(session,data.token)
     return user
+#
+# @auth_router.post('/resend-verification',status_code=204)
+# def resend_verification(session:SessionDep,user:Users=Depends(get_current_user)):
+#     request_email_verification(session, user)

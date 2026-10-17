@@ -132,4 +132,8 @@ class TeamInvitationPreviewSchema(BaseModel):
 class EmailVerificationConfirmSchema(BaseModel):
     token:str=Field(min_length=1)
 
+class UserRegistrationResponseSchema(UserResponseSchema):
+    verification_email_sent: bool
+
+
 
