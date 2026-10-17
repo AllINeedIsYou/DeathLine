@@ -1,11 +1,13 @@
 
 from fastapi import APIRouter, Response,Request,Depends,HTTPException
-from .shemas import UserCreateSchema,UserResponseSchema,UserLoginSchema,EmailVerificationConfirmSchema,UserRegistrationResponseSchema
+from .shemas import UserCreateSchema,UserResponseSchema,UserLoginSchema,EmailVerificationConfirmSchema,UserRegistrationResponseSchema,PasswordResetConfirmSchema,PasswordResetRequestSchema
 from .service.service_auth import register_user,authenticate_user,create_session,get_user_by_session,delete_session
 from DataBase.database import SessionDep
 from .dependencies import get_current_user
 from DataBase.models import Users
 from .service.service_email_verification import confirm_email,request_email_verification
+from .service.service_password_reset import request_password_reset
+from .service.service_password_reset import reset_password
 
 auth_router = APIRouter(prefix='/auth', tags=['Auth'])
 
@@ -57,7 +59,17 @@ def logout(session:SessionDep, response:Response,request: Request):
 def email_confirm(session:SessionDep, data:EmailVerificationConfirmSchema):
     user=confirm_email(session,data.token)
     return user
-#
-# @auth_router.post('/resend-verification',status_code=204)
-# def resend_verification(session:SessionDep,user:Users=Depends(get_current_user)):
-#     request_email_verification(session, user)
+
+@auth_router.post('/resend-verification',status_code=204)
+def resend_verification(session:SessionDep,user:Users=Depends(get_current_user)):
+    request_email_verification(session, user)
+
+@auth_router.post('/forgot-password')
+def forgot_password(session:SessionDep,data:PasswordResetRequestSchema):
+    request_password_reset(session,data.email)
+    message='Если аккаунт с такой почтой существует, мы отправили ссылку для сброса пароля.'
+    return {"detail": message}
+
+@auth_router.post('/reset-password',status_code=204)
+def res_password(session:SessionDep,data:PasswordResetConfirmSchema):
+    reset_password(session,data.token,data.new_password)

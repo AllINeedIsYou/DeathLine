@@ -135,5 +135,10 @@ class EmailVerificationConfirmSchema(BaseModel):
 class UserRegistrationResponseSchema(UserResponseSchema):
     verification_email_sent: bool
 
+class PasswordResetRequestSchema(BaseModel):
+    email:EmailStr
 
+class PasswordResetConfirmSchema(BaseModel):
+    token:str=Field(min_length=1)
+    new_password:str=Field(min_length=8,max_length=128)
 
