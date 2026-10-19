@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
 from DataBase.database import SessionDep
 from api.shemas import TeamCreateSchema, TeamMemberResponseSchema, TaskCreateSchema, TaskUpdateSchema, \
-    MyTeamResponseSchema
+    MyTeamResponseSchema,TeamMemberUpdateSchema
 from DataBase.models import Teams, TeamMembers, TeamRole, Users, Tasks
 from fastapi import HTTPException
 
@@ -62,6 +62,7 @@ def get_team_members(session:SessionDep,team_id:int):
             team_id=member.team_id,
             joined_at=member.joined_at,
             role=member.role,
+            job_title=member.job_title,
             user=user
         )
         result.append(TeamMember)
@@ -177,7 +178,22 @@ def get_team_member_profile(session:SessionDep,team_id:int,employee_member_id:in
             team_id=teammember.team_id,
             joined_at=teammember.joined_at,
             role=teammember.role,
+            job_title=teammember.job_title,
             user=user
         )
     return response
 
+def update_team_member(session:SessionDep,team_id:int,employee_member_id:int,member_data:TeamMemberUpdateSchema):
+    member=session.query(TeamMembers).filter(TeamMembers.team_id==team_id,TeamMembers.id==employee_member_id).first()
+    if member is None:
+        raise HTTPException(status_code=404)
+    member_dumb=member_data.model_dump(exclude_unset=True)
+    try:
+        if 'job_title' in member_dumb:
+            member.job_title=member_dumb['job_title']
+            session.commit()
+            session.refresh(member)
+    except IntegrityError:
+        session.rollback()
+        raise
+    return get_team_member_profile(session,team_id, employee_member_id)

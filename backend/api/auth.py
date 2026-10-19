@@ -12,7 +12,7 @@ from .service.service_users import update_current_user
 
 auth_router = APIRouter(prefix='/auth', tags=['Auth'])
 
-@auth_router.post('/register', response_model=UserRegistrationResponseSchema, summary='Регистарция',status_code=201)
+@auth_router.post('/register', response_model=UserRegistrationResponseSchema, summary='Зарегистрировать аккаунт',status_code=201)
 def register_new_user(session:SessionDep, user_data:UserCreateSchema):
     user=register_user(session=session,user_data=user_data)
 
@@ -28,7 +28,7 @@ def register_new_user(session:SessionDep, user_data:UserCreateSchema):
     return user_response
 
 
-@auth_router.post('/login', response_model=UserResponseSchema, summary='Вход')
+@auth_router.post('/login', response_model=UserResponseSchema, summary='Войти в аккаунт и создать сессию')
 def login(session:SessionDep, user_data:UserLoginSchema, response:Response):
     user = authenticate_user(session=session,user_data=user_data)
 
@@ -44,16 +44,16 @@ def login(session:SessionDep, user_data:UserLoginSchema, response:Response):
     )
     return user
 
-@auth_router.get('/me', response_model=UserResponseSchema,summary="Поиск по токену пользователя")
+@auth_router.get('/me', response_model=UserResponseSchema,summary='Получить свой профиль')
 def find_me_by_token(user: Users = Depends(get_current_user)):
     return user
-@auth_router.patch('/me',response_model=UserResponseSchema,summary='Изменения данных профиля')
+@auth_router.patch('/me',response_model=UserResponseSchema,summary='Изменить свой профиль')
 def update_user(session:SessionDep,user_data:UserUpdateSchema,user: Users = Depends(get_current_user)):
     return update_current_user(session, user, user_data)
 
 
 
-@auth_router.post('/logout', summary='Выход', status_code=204)
+@auth_router.post('/logout', summary='Выйти из аккаунта и завершить текущую сессию', status_code=204)
 def logout(session:SessionDep, response:Response,request: Request):
     token=request.cookies.get("deathline_session")
     delete_session(session=session,token=token)
@@ -61,21 +61,21 @@ def logout(session:SessionDep, response:Response,request: Request):
     return
 
 
-@auth_router.post('/verify-email',response_model=UserResponseSchema)
+@auth_router.post('/verify-email',response_model=UserResponseSchema, summary='Подтвердить почту по токену из письма')
 def email_confirm(session:SessionDep, data:EmailVerificationConfirmSchema):
     user=confirm_email(session,data.token)
     return user
 
-@auth_router.post('/resend-verification',status_code=204)
+@auth_router.post('/resend-verification',status_code=204, summary='Повторно отправить письмо для подтверждения почты')
 def resend_verification(session:SessionDep,user:Users=Depends(get_current_user)):
     request_email_verification(session, user)
 
-@auth_router.post('/forgot-password')
+@auth_router.post('/forgot-password', summary='Запросить письмо со ссылкой для сброса пароля')
 def forgot_password(session:SessionDep,data:PasswordResetRequestSchema):
     request_password_reset(session,data.email)
     message='Если аккаунт с такой почтой существует, мы отправили ссылку для сброса пароля.'
     return {"detail": message}
 
-@auth_router.post('/reset-password',status_code=204)
+@auth_router.post('/reset-password',status_code=204, summary='Установить новый пароль по токену и завершить все сессии')
 def res_password(session:SessionDep,data:PasswordResetConfirmSchema):
     reset_password(session,data.token,data.new_password)

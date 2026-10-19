@@ -106,7 +106,13 @@ class TeamMemberResponseSchema(BaseModel):
     team_id:int
     joined_at: datetime
     role: TeamRole
+    job_title: str | None
     user:UserResponseSchema
+
+class TeamMemberUpdateSchema(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    job_title:str|None=Field(min_length=1,max_length=120,default=None)
 
 class MyTeamResponseSchema(TeamResponseSchema):
     model_config = ConfigDict(from_attributes=True)
