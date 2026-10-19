@@ -10,7 +10,7 @@ from .shemas import TeamResponseSchema, TeamCreateSchema, TeamMemberResponseSche
     PrivateWorkerNoteWriteSchema
 
 from .service.service_team import create_team, get_user_teams, get_team_members, add_task, get_team_tasks, \
-     task_editing, complete_task, find_task_for_id,get_task_for_user
+     task_editing, complete_task, find_task_for_id,get_task_for_user,get_team_member_profile
 from .service.service_invitations import create_team_invitation, get_team_invitations, revoke_team_invitation
 from .service.service_notes import get_private_worker_note,save_private_worker_note,delete_private_worker_note
 
@@ -85,3 +85,6 @@ def create_note(session:SessionDep,note_data:PrivateWorkerNoteWriteSchema,employ
 def del_note(session:SessionDep,employee_member_id:int,admin:TeamMembers=Depends(get_current_team_admin)):
     delete_private_worker_note(session,admin.team_id,employee_member_id,admin.id)
 
+@teams_router.get('/{team_id}/members/{employee_member_id}',response_model=TeamMemberResponseSchema)
+def get_user(session:SessionDep,employee_member_id:int,admin:TeamMembers=Depends(get_current_team_admin)):
+    return get_team_member_profile(session,admin.team_id,employee_member_id)

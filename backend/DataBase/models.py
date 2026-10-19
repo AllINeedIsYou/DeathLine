@@ -65,6 +65,8 @@ class TeamMembers(Base):
 
     role:Mapped[TeamRole]=mapped_column(nullable=False)
 
+    job_title:Mapped[str|None]=mapped_column(String(120),default=None)
+
     joined_at:Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 class priorities(Enum):

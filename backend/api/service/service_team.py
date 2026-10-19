@@ -165,3 +165,19 @@ def get_task_for_user(session: SessionDep, user_id:int, team_id:int,task_id:int)
     if task.user_id != member.user_id and member.role!=TeamRole.admin:
         raise HTTPException(status_code=403)
     return task
+
+def get_team_member_profile(session:SessionDep,team_id:int,employee_member_id:int):
+    member=session.query(TeamMembers,Users).join(Users,TeamMembers.user_id==Users.id).filter(TeamMembers.team_id==team_id,TeamMembers.id==employee_member_id).first()
+    if member is None:
+        raise HTTPException(status_code=404)
+    else:
+        teammember,user=member
+        response=TeamMemberResponseSchema(
+            id=teammember.id,
+            team_id=teammember.team_id,
+            joined_at=teammember.joined_at,
+            role=teammember.role,
+            user=user
+        )
+    return response
+
