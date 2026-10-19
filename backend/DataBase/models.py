@@ -47,6 +47,8 @@ class Teams(Base):
 
     name:Mapped[str]=mapped_column(String(120),nullable=False)
 
+    timezone:Mapped[str]=mapped_column(String(40), default='Europe/Moscow', nullable=False)
+
     created_at:Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 class TeamRole(Enum):
@@ -173,3 +175,28 @@ class PrivateWorkerNotes(Base):
     text:Mapped[str]=mapped_column(String(4000),nullable=False)
 
     updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),nullable=False)
+
+class TaskEventType(Enum):
+    created='created'
+    updated='updated'
+    completed='completed'
+
+
+class TaskEvents(Base):
+    __tablename__ = 'TaskEvents'
+
+    id:Mapped[int]=mapped_column(primary_key=True)
+
+    task_id:Mapped[int]=mapped_column(ForeignKey(Tasks.id))
+
+    team_id:Mapped[int]=mapped_column(ForeignKey(Teams.id))
+
+    user_id:Mapped[int]=mapped_column(ForeignKey(Users.id))
+
+    event_type:Mapped[TaskEventType]
+
+    occurred_at:Mapped[datetime]=mapped_column(DateTime(timezone=True))
+
+    deadline:Mapped[datetime]=mapped_column(DateTime(timezone=True))
+
+    completed_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))

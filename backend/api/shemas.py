@@ -30,6 +30,7 @@ class TaskUpdateSchema(BaseModel):
   description: str | None = Field(default=None, max_length=2000)
   priority: priorities | None = None
   deadline: datetime | None = None
+  user_id:int|None= Field(default=None, gt=0)
 
 #=========================================================
 
@@ -91,7 +92,19 @@ class UserUpdateSchema(BaseModel):
 
 class TeamCreateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True,str_strip_whitespace=True)
+
     name:str= Field(max_length=120, min_length=1)
+    timezone:str=Field(max_length=40,min_length=1,default='Europe/Moscow')
+    @field_validator('timezone')
+    @classmethod
+    def timezone_validator(cls, value: str):
+        try:
+            ZoneInfo(value)
+
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError("Укажите существующий часовой пояс")
+        return value
+
 
 class TeamResponseSchema(TeamCreateSchema):
     model_config = ConfigDict(from_attributes=True)
@@ -181,3 +194,35 @@ class PrivateWorkerNoteResponseSchema(PrivateWorkerNoteWriteSchema):
     updated_at:datetime
 
 #=========================================================
+
+class TaskStatisticsResponseSchema(BaseModel):
+    total:int
+    active:int
+    completed:int
+    overdue:int
+    on_time_percent: float | None
+    productivity_percent: float | None
+
+class GoatMemberResponseSchema(BaseModel):
+    member_id:int
+    user_id:int
+    name:str
+    job_title:str|None
+    statistics:TaskStatisticsResponseSchema
+    score:float|None
+    rank:int|None
+
+class GoatAdminResponseSchema(BaseModel):
+    team_id: int
+    year: int
+    month: int
+    timezone: str
+    members: list[GoatMemberResponseSchema]
+
+class GoatUserResponseSchema(BaseModel):
+    team_id: int
+    year: int
+    month: int
+    timezone: str
+    leaders: list[GoatMemberResponseSchema]
+    my_result: GoatMemberResponseSchema

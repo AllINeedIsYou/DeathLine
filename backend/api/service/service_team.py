@@ -35,6 +35,7 @@ def get_user_teams(session:SessionDep,user_id:int):
             name=team.name,
             role=member.role,
             created_at=team.created_at,
+            timezone=team.timezone,
         )
         teamsresult.append(myteam)
     return teamsresult
@@ -117,15 +118,23 @@ def task_editing(session: SessionDep, task_id:int,team_id:int, task_data:TaskUpd
 
     # получаем словарь из данных, отбрасывая непереданные (None) поля
     update_data = task_data.model_dump(exclude_unset=True)
-
-    for field in ("title", "priority", "deadline"):
+    if not update_data:
+        return task
+    now=datetime.now(timezone.utc)
+    for field in ("title", "priority", "deadline",'user_id'):
         if field in update_data and update_data[field] is None:
             raise HTTPException(status_code=422,detail=f"Поле {field} нельзя передать как null")
         if field=="deadline" and  field in update_data:
             if update_data[field].tzinfo is None:
                     raise HTTPException(status_code=422, detail="Incorrect timezone")
+            if update_data[field]<=now:
+                raise HTTPException(status_code=422,detail='Укажите будущий дедлайн')
+        if field=='user_id' and field in update_data:
+            user=session.query(TeamMembers).filter(TeamMembers.team_id==team_id,TeamMembers.user_id==update_data['user_id']).first()
+            if user is None:
+                raise HTTPException(status_code=422,detail='Исполнитель не состоит в команде')
 
-    task.updated_at = datetime.now(timezone.utc)
+    task.updated_at = now
 
     # key столбец  value новое значение
     for key, value in update_data.items(): #.item как раз и берет парам столбец|новое значение
@@ -157,8 +166,8 @@ def complete_task(session: SessionDep, task_id:int,team_id:int,user_id:int):
 #функция для возвращения всех задач конкретного работника
 def find_task_for_id(session: SessionDep, user_id:int, team_id:int):
     member=get_team_member(session,team_id,user_id)
-    task=session.query(Tasks).filter(Tasks.team_id==member.team_id,Tasks.user_id == member.user_id).all()
-    return task
+    tasks=session.query(Tasks).filter(Tasks.team_id==member.team_id,Tasks.user_id == member.user_id).all()
+    return tasks
 #Возвращает конкретную задачу конкретного пользователя (для админа)
 def get_task_for_user(session: SessionDep, user_id:int, team_id:int,task_id:int):
     task = find_only_task(session,task_id,team_id)
