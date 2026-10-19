@@ -156,3 +156,18 @@ class PasswordResetTokens(Base):
 
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
+class PrivateWorkerNotes(Base):
+    __tablename__ = "PrivateWorkerNotes"
+    __table_args__ = (UniqueConstraint("author_member_id", "employee_member_id", name="uq_private_worker_note"),)
+
+    id:Mapped[int]=mapped_column(primary_key=True)
+
+    team_id:Mapped[int]=mapped_column(ForeignKey(Teams.id),nullable=False)
+
+    author_member_id:Mapped[int]=mapped_column(ForeignKey(TeamMembers.id),nullable=False)
+
+    employee_member_id: Mapped[int] = mapped_column(ForeignKey(TeamMembers.id),nullable=False)
+
+    text:Mapped[str]=mapped_column(String(4000),nullable=False)
+
+    updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),nullable=False)

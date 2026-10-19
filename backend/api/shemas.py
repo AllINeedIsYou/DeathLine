@@ -50,7 +50,7 @@ class UserCreateSchema(BaseModel):
             ZoneInfo(value)
 
         except (ZoneInfoNotFoundError, ValueError):
-            raise ValueError("Укажи существующий часовой пояс")
+            raise ValueError("Укажите существующий часовой пояс")
         return value
 
 class UserResponseSchema(BaseModel):
@@ -69,6 +69,24 @@ class UserResponseSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     username: str = Field(min_length=1, max_length=40)
     password: str = Field(min_length=1, max_length=128)
+
+class UserUpdateSchema(BaseModel):
+    name:str|None=Field(min_length=1, max_length=80,default=None)
+    phone:PhoneNumber|None=None
+    telegram:str|None=Field(min_length=1, max_length=33,default=None)
+    timezone:str|None=Field(min_length=1, max_length=40,default=None)
+
+    @field_validator('timezone')
+    @classmethod
+    def timezone_validator(cls, value: str|None):
+        if value is None:
+            return value
+        try:
+            ZoneInfo(value)
+
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError("Укажите существующий часовой пояс")
+        return value
 #=========================================================
 
 class TeamCreateSchema(BaseModel):
@@ -141,4 +159,19 @@ class PasswordResetRequestSchema(BaseModel):
 class PasswordResetConfirmSchema(BaseModel):
     token:str=Field(min_length=1)
     new_password:str=Field(min_length=8,max_length=128)
+#=========================================================
+class PrivateWorkerNoteWriteSchema(BaseModel):
+    model_config=ConfigDict(str_strip_whitespace=True)
 
+    text:str=Field(max_length=4000,min_length=1)
+
+class PrivateWorkerNoteResponseSchema(PrivateWorkerNoteWriteSchema):
+    model_config=ConfigDict(from_attributes=True)
+
+    id:int
+    team_id:int
+    author_member_id:int
+    employee_member_id:int
+    updated_at:datetime
+
+#=========================================================

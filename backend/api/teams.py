@@ -5,11 +5,14 @@ from DataBase.models import Users,TeamMembers
 from .dependencies import get_current_user,get_current_team_admin
 
 from .shemas import TeamResponseSchema, TeamCreateSchema, TeamMemberResponseSchema, TaskCreateSchema, \
-    TaskResponseSchema, TaskUpdateSchema,MyTeamResponseSchema,TeamInvitationLinkResponseSchema,TeamInvitationCreateSchema,TeamInvitationListItemSchema,TeamInvitationPreviewSchema
+    TaskResponseSchema, TaskUpdateSchema, MyTeamResponseSchema, TeamInvitationLinkResponseSchema, \
+    TeamInvitationCreateSchema, TeamInvitationListItemSchema, PrivateWorkerNoteResponseSchema, \
+    PrivateWorkerNoteWriteSchema
 
 from .service.service_team import create_team, get_user_teams, get_team_members, add_task, get_team_tasks, \
      task_editing, complete_task, find_task_for_id,get_task_for_user
 from .service.service_invitations import create_team_invitation, get_team_invitations, revoke_team_invitation
+from .service.service_notes import get_private_worker_note,save_private_worker_note,delete_private_worker_note
 
 teams_router = APIRouter(prefix="/teams",tags=["Teams"])
 
@@ -69,3 +72,16 @@ def get_all_invitations(session:SessionDep,member: TeamMembers = Depends(get_cur
 @teams_router.delete('/{team_id}/invitations/{invitation_id}',status_code=204)
 def del_invite(session:SessionDep,invitation_id:int,member:TeamMembers=Depends(get_current_team_admin)):
     revoke_team_invitation(session=session,team_id=member.team_id,invitation_id=invitation_id)
+
+@teams_router.get('/{team_id}/members/{employee_member_id}/private-note',response_model=PrivateWorkerNoteResponseSchema|None,summary='Чтение личной заметки конкретного пользователя')
+def read_private_worker_note(session:SessionDep,employee_member_id:int,admin:TeamMembers=Depends(get_current_team_admin)):
+    return get_private_worker_note(session,admin.team_id,employee_member_id,admin.id)
+
+@teams_router.put('/{team_id}/members/{employee_member_id}/private-note',response_model=PrivateWorkerNoteResponseSchema,summary='Создать заметку конкретному работнику')
+def create_note(session:SessionDep,note_data:PrivateWorkerNoteWriteSchema,employee_member_id:int,admin:TeamMembers=Depends(get_current_team_admin)):
+    return save_private_worker_note(session,admin.team_id,employee_member_id,admin.id,note_data)
+
+@teams_router.delete('/{team_id}/members/{employee_member_id}/private-note',status_code=204,summary='Удаление заметки')
+def del_note(session:SessionDep,employee_member_id:int,admin:TeamMembers=Depends(get_current_team_admin)):
+    delete_private_worker_note(session,admin.team_id,employee_member_id,admin.id)
+

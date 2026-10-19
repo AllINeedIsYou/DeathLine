@@ -1,13 +1,14 @@
 
 from fastapi import APIRouter, Response,Request,Depends,HTTPException
-from .shemas import UserCreateSchema,UserResponseSchema,UserLoginSchema,EmailVerificationConfirmSchema,UserRegistrationResponseSchema,PasswordResetConfirmSchema,PasswordResetRequestSchema
-from .service.service_auth import register_user,authenticate_user,create_session,get_user_by_session,delete_session
+from .shemas import UserCreateSchema,UserResponseSchema,UserLoginSchema,EmailVerificationConfirmSchema,UserUpdateSchema,UserRegistrationResponseSchema,PasswordResetConfirmSchema,PasswordResetRequestSchema
+from .service.service_auth import register_user,authenticate_user,create_session,delete_session
 from DataBase.database import SessionDep
 from .dependencies import get_current_user
 from DataBase.models import Users
 from .service.service_email_verification import confirm_email,request_email_verification
 from .service.service_password_reset import request_password_reset
 from .service.service_password_reset import reset_password
+from .service.service_users import update_current_user
 
 auth_router = APIRouter(prefix='/auth', tags=['Auth'])
 
@@ -46,6 +47,11 @@ def login(session:SessionDep, user_data:UserLoginSchema, response:Response):
 @auth_router.get('/me', response_model=UserResponseSchema,summary="Поиск по токену пользователя")
 def find_me_by_token(user: Users = Depends(get_current_user)):
     return user
+@auth_router.patch('/me',response_model=UserResponseSchema,summary='Изменения данных профиля')
+def update_user(session:SessionDep,user_data:UserUpdateSchema,user: Users = Depends(get_current_user)):
+    return update_current_user(session, user, user_data)
+
+
 
 @auth_router.post('/logout', summary='Выход', status_code=204)
 def logout(session:SessionDep, response:Response,request: Request):
