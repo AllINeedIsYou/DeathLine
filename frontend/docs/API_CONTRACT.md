@@ -1,161 +1,100 @@
-# DeathLine: предложение контракта API
+# DeathLine integrated API contract
 
-Предложение для владельца бэкенда, 11 октября 2026. Маршруты ниже ещё не подключены к фронту и не считаются существующими. Можно согласовать другие имена до интеграции. План реализации — [BACKEND_NEXT_STEPS.md](BACKEND_NEXT_STEPS.md).
+The frontend calls `/api`; Vite removes the prefix and forwards requests to FastAPI on `127.0.0.1:8000`. Every request uses `credentials: include`. The server session is stored in the HttpOnly `deathline_session` cookie. No authentication token is returned to frontend JavaScript.
 
-## Общие правила
+## Identifiers and timestamps
 
-- JSON в snake_case; интерфейс использует camelCase. Я добавлю преобразование при подключении.
-- Время — ISO 8601 UTC со смещением/Z. На клиенте преобразуется в миллисекунды для существующих компонентов.
-- ID в примерах числовые; тип нужно закрепить в OpenAPI. member_id — идентификатор членства в команде, не пользователя.
-- При отсутствии данных — пустой items, не демонстрационные записи. Отсутствующее необязательное значение — null; отсутствие рейтинга не равно нулевому баллу.
-- Сессия и роль проверяются сервером на каждом запросе. team_id/member_id из URL не предоставляют прав.
-- Успешная запись возвращает сохранённый объект JSON (или 204 для logout), а не текст «Успешно, работник создан».
-- Списки: `{ "items": [], "total": 0, "limit": 50, "offset": 0, "server_now": "2026-10-11T09:00:00Z" }`.
-- Поиск, сортировка и фильтры применяются до пагинации. Для полной сводки/графика нужны отдельные агрегаты: нельзя считать командную статистику только по первой странице.
-- 401 — нет сессии, 403 — нет прав, 404 — нет доступного ресурса, 409 — конфликт/недоступный переход, 422 — неверные поля. Для секретных/чужих ресурсов можно одинаково возвращать 404.
-- Пример доменной ошибки: `{ "detail": { "code": "task_completed", "message": "Задача уже выполнена." } }`. Стандартные ошибки валидации FastAPI можно оставить отдельным форматом; фронт их обработает.
+- `Users.id` identifies an account. Tasks use `user_id` for the assignee.
+- `TeamMembers.id` identifies an account's membership in a specific team. Profiles, notes, member statistics, and member history use it in `members/{employee_member_id}`.
+- `GET /teams` returns the current account's teams with `id`, `name`, `timezone`, `role`, and `created_at`. Roles belong to memberships and remain separate from job titles.
+- Timestamps use ISO 8601 with a time zone. The deadline form converts its value to UTC using `toISOString()`.
+- An empty task PATCH does not update the task. The frontend only sends changed fields, allowing an overdue task title to change without resubmitting its unchanged deadline.
+- `null` and `0` differ: a zero score is a real result; missing history is not the same as no tasks.
 
-## 1. Аккаунты и сессия
+## Authentication
 
-| Метод и маршрут | Вход / результат |
-| --- | --- |
-| POST /auth/register | name, email, username, password; phone/telegram опциональны → пользователь с email_verified=false; роль команды не принимается |
-| POST /auth/verify-email | token → подтверждённая почта |
-| POST /auth/resend-verification | email → нейтральное подтверждение запроса, ограничение частоты |
-| POST /auth/login | username, password → сессия в cookie + сведения текущего пользователя |
-| GET /auth/me | Текущий пользователь и доступные членства |
-| POST /auth/logout | Завершение сессии, очистка cookie, 204 |
+| Method | Path | Request / result |
+| --- | --- | --- |
+| POST | `/auth/register` | `name`, `username`, `email`, `password`, `timezone`, optional `phone`, `telegram`; 201, profile plus `verification_email_sent` |
+| POST | `/auth/login` | `username`, `password`; profile and session cookie |
+| GET | `/auth/me` | Current profile; 401 without a valid session |
+| PATCH | `/auth/me` | Own name, phone, Telegram, and time zone; updated profile |
+| POST | `/auth/logout` | 204, session and cookie removed |
+| POST | `/auth/verify-email` | `token`; verified profile |
+| POST | `/auth/resend-verification` | Authenticated user, 204 |
+| POST | `/auth/forgot-password` | `email`; generic result that does not reveal whether an account exists |
+| POST | `/auth/reset-password` | `token`, `new_password`; 204, all user sessions ended |
 
-Предложение ответа `/auth/me`:
+New passwords require 8–128 characters, at least one uppercase letter and one special character. Whitespace does not count as special. Sign-in does not revalidate existing passwords against the new policy. Registration does not create a session: the frontend signs in separately, then shows email verification.
 
-```json
-{
-  "id": 7,
-  "name": "Имя пользователя",
-  "username": "username",
-  "email": "user@example.com",
-  "email_verified": true,
-  "phone": null,
-  "telegram": null,
-  "time_zone": "Europe/Moscow",
-  "memberships": [{ "id": 12, "team_id": 3, "team_name": "Название команды", "role": "admin", "job_title": "Руководитель" }],
-  "server_now": "2026-10-11T09:00:00Z"
-}
-```
+## Teams and invitations
 
-Для одного пользователя без команды memberships=[] и открывается создание команды/ожидание приглашения. При нескольких членствах потребуется согласовать выбор активной команды; нельзя молча выдавать чужую роль. Пароли и хеши не возвращаются.
+| Method | Path | Purpose |
+| --- | --- | --- |
+| POST | `/teams` | `name`, `timezone`; creator becomes admin, 201 |
+| GET | `/teams` | Current account's teams and membership roles |
+| GET | `/teams/{team_id}/members` | Members with nested `user`, role, and job title; admin |
+| GET | `/teams/{team_id}/members/{employee_member_id}` | Member profile; admin |
+| PATCH | `/teams/{team_id}/members/{employee_member_id}` | `job_title`, or `null` to clear it; admin |
+| POST | `/teams/{team_id}/invitations` | `email`, `role`; 201, `{invitation, invite_url}`; admin |
+| GET | `/teams/{team_id}/invitations` | Invitations and statuses; admin |
+| DELETE | `/teams/{team_id}/invitations/{invitation_id}` | Revoke an invitation, 204; admin |
+| GET | `/invitations/{token}` | Public preview: `team_id`, `team_name`, `email`, `role`, `expires_at`, `status` |
+| POST | `/invitations/{token}/accept` | 204; current account must have the matching verified email |
 
-## 2. Команда и участники
+Statuses: `pending`, `accepted`, `expired`, `revoked`. Links last seven days. Lists do not expose raw tokens: the frontend offers a copy action immediately after creation. After verifying their email, recipients return to the original invitation tab. The invitation determines the role; registration cannot grant an administrator role.
 
-| Метод и маршрут | Назначение |
-| --- | --- |
-| POST /teams | `{ "name": "Название команды", "time_zone": "Europe/Moscow" }` → команда и admin-членство создателя |
-| GET /teams/{team_id}/members | Админу — список участников для таблицы и назначения задач |
-| GET /teams/{team_id}/members/{member_id} | Анкета участника и агрегаты задач |
-| PATCH /teams/{team_id}/members/{member_id} | Изменение разрешённых полей анкеты администратором |
+## Tasks
 
-Элемент участника:
+| Method | Path | Purpose |
+| --- | --- | --- |
+| POST | `/teams/{team_id}/tasks` | Assign a task to a member; admin, 201 |
+| GET | `/teams/{team_id}/tasks` | All team tasks; admin |
+| GET | `/teams/{team_id}/my-tasks` | Own tasks, including completed tasks |
+| GET | `/teams/{team_id}/tasks/{task_id}` | One task; assignee or admin |
+| PATCH | `/teams/{team_id}/tasks/{task_id}` | Edit an unfinished task; admin |
+| POST | `/teams/{team_id}/tasks/{task_id}/complete` | Complete your own task; repeated calls preserve completion time |
 
-```json
-{
-  "id": 12,
-  "user_id": 7,
-  "team_id": 3,
-  "name": "Имя сотрудника",
-  "role": "employee",
-  "job_title": "Разработчик",
-  "email": "user@example.com",
-  "telegram": null,
-  "phone": null,
-  "time_zone": "Europe/Moscow",
-  "rating": null
-}
-```
+Creation payload: `title`, nullable `description`, `user_id`, `priority` (`high`, `medium`, `low`), and `deadline`. Responses also include `id`, `team_id`, `created_at`, `updated_at`, and `completed_at`. PATCH cannot move a task between teams. A new deadline must be in the future; overdue tasks can still be completed. Administrators can complete tasks assigned to themselves.
 
-На фронте id участника становится Worker.id; job_title → Worker.role (должность), а серверное role остаётся правами доступа и не подменяется должностью. Инициалы/цвет аватара вычисляются фронтом. Пока рейтинг не готов — null и «Недостаточно данных», без подставленного score.
+## Private notes
 
-Важно перед подключением уточнить право изменения имени и email: адрес аккаунта нельзя менять без подтверждения владельца через обычный редактор рабочей анкеты. Если нужен отдельный рабочий контакт, добавляется contact_email, а email аккаунта остаётся отдельным.
+Administrators only access their own notes about a member:
 
-## 3. Задачи: первый блок после входа
+- GET `/teams/{team_id}/members/{employee_member_id}/private-note` returns the note with `text` and its timestamp, or `null`.
+- PUT at the same path accepts `{text}` up to 4000 characters and returns the saved record. Empty strings are rejected.
+- DELETE at the same path returns 204. Clearing the frontend form uses DELETE.
 
-| Метод и маршрут | Назначение |
-| --- | --- |
-| GET /teams/{team_id}/tasks | Все задачи команды админу; сотруднику только его задачи |
-| GET /teams/{team_id}/tasks/{task_id} | Детали доступной задачи |
-| POST /teams/{team_id}/tasks | Создать задачу, только админ |
-| PATCH /teams/{team_id}/tasks/{task_id} | Изменить незавершённую задачу, только админ |
-| POST /teams/{team_id}/tasks/{task_id}/complete | Выполнить свою задачу, только назначенный сотрудник; момент фиксирует сервер |
+The session determines the author. Notes are excluded from shared profiles, general lists, and employee responses.
 
-Фильтры списка: status=active/completed/overdue, member_id, priority=high/medium/low, deadline=all/today/week/overdue, query, sort=deadline_asc/deadline_desc/created_desc, limit, offset. Неизвестное значение фильтра — 422. Фильтр member_id не должен расширять доступ сотрудника. Границы today/week — в часовом поясе команды, точное начало недели закрепить в контракте.
+## Statistics and GOAT
 
-Создание:
+GET `/teams/{team_id}/statistics` (admin), `/my-statistics` (own tasks), or `/members/{employee_member_id}/statistics` (admin).
 
-```json
-{
-  "assignee_member_id": 12,
-  "title": "Название задачи",
-  "description": "Описание результата",
-  "priority": "high",
-  "deadline": "2026-10-12T15:00:00Z"
-}
-```
+Response: `total`, `active`, `completed`, `overdue`, `productivity_percent`, `on_time_percent`. These statistics cover all tasks, not just one month. Productivity is completed / (completed + unfinished overdue); punctuality is completed on time / completed. A zero denominator gives null.
 
-Ответ задачи:
+- GET `/teams/{team_id}/goat/admin?year=2026&month=10` returns `team_id`, `year`, `month`, `timezone`, and the complete `members` ranking; admin.
+- GET `/teams/{team_id}/goat?year=2026&month=10` returns the same period fields, `leaders`, and `my_result`; any member. It does not include the full ranking or the lowest-rated members.
 
-```json
-{
-  "id": 105,
-  "team_id": 3,
-  "assignee_member_id": 12,
-  "title": "Название задачи",
-  "description": "Описание результата",
-  "priority": "high",
-  "deadline": "2026-10-12T15:00:00Z",
-  "created_at": "2026-10-11T09:00:00Z",
-  "updated_at": "2026-10-11T09:00:00Z",
-  "completed_at": null,
-  "status": "active",
-  "completed_late": false,
-  "late_seconds": 0
-}
-```
+A ranking entry contains `member_id`, `user_id`, `name`, `job_title`, `statistics`, `score`, and `rank`. At least five completed or overdue tasks are required. The score combines 60% productivity and 40% punctuality, rounded to one decimal place. A task belongs to its deadline month in the team's time zone; late completion updates that month's rating. Ties use ranks 1, 2, 2, 4. Insufficient data gives null for both `score` and `rank`. Zero scores stay visible.
 
-assignee_member_id → workerId; created_at → createdAt; completed_at → completedAt. Краткое описание/категорию фронт может получить из description/должности без дополнительных обязательных полей API.
+## Task history
 
-Выполнение не принимает completed_at от клиента. Повторное выполнение идемпотентно, сохраняет исходное completed_at. Статус completed важнее overdue; позднее завершение обозначается отдельными completed_late/late_seconds. Проверяется строго completed_at > deadline; равенство в срок. Незавершённая просрочка определяется серверным текущим временем, даже когда браузер закрыт. Завершённую задачу текущая форма не редактирует; конфликт → 409.
+Both routes require admin access:
 
-При переносе дедлайна сохранить историю изменения. Перенос незавершённого срока на +1 день/+неделю/+месяц на фронте задаёт конкретный новый абсолютный deadline; сервер сохраняет именно его, проверив корректность. Для календарного месяца уже используется календарное прибавление с ограничением дня до конца месяца, не фиксированные 30 суток.
+- GET `/teams/{team_id}/history?year=2026&month=10` — daily team chart.
+- GET `/teams/{team_id}/members/{employee_member_id}/history?year=2026&month=10` — member chart.
 
-## 4. Приглашения
+Response: `team_id`, nullable `member_id` for team scope, `year`, `month`, `timezone`, `as_of`, `history_complete`, and `points`. A point contains `{at, created, completed, overdue}`.
 
-| Метод и маршрут | Назначение |
-| --- | --- |
-| GET /teams/{team_id}/invitations | Список со статусами, только админ |
-| POST /teams/{team_id}/invitations | email, role → приглашение и invite_url |
-| DELETE /teams/{team_id}/invitations/{invitation_id} | Отмена действующего приглашения |
-| GET /invitations/{token} | Минимальные сведения для страницы получателя: команда, роль, получатель, срок, статус |
-| POST /invitations/{token}/accept | Принять текущим подтверждённым аккаунтом; членство и расходование ссылки атомарно |
+Days follow the team's time zone. Finished days use their end-of-day state; today uses `as_of`. Future points are omitted. For team scope, `created` counts all tasks that existed at that point, including earlier months. For member scope it counts tasks assigned to that member at the point, so the frontend labels the series Assigned. Reassignment can reduce this number. `completed` and `overdue` describe state at the point, not events during that day.
 
-Случайный токен, хеш в базе, срок 7 дней. invite_url — адрес реального фронта `/invite/<token>`. Состояния pending/accepted/expired/revoked; срок рассчитывается сервером. Получатель не выбирает роль сам, почта подтверждённого аккаунта совпадает с приглашением. Старый токен не оживает при повторном приглашении. Действующий дубликат в одной команде → 409; уже существующий участник → 409.
+Deadline and assignee changes do not rewrite earlier points. November completion does not add a completed task to October's chart. Missing older history gives null values and `history_complete=false`; the frontend draws gaps. Empty teams have zero counters. Events are saved in the same transaction as the task mutation.
 
-## 5. Личная заметка админа
+GOAT and history require `year` from 2000 to 2100 and `month` from 1 to 12.
 
-`GET /teams/{team_id}/members/{member_id}/private-note` → `{ "text": "", "updated_at": null }`, если заметки нет.
+## Errors and refresh
 
-`PUT /teams/{team_id}/members/{member_id}/private-note` с `{ "text": "Текст до 4000 символов" }` → сохранённая заметка. Пустая строка очищает запись.
+401 ends the authenticated screen and opens sign-in. 403 means access denied. 404 means an object is unavailable in the current scope. 409 is a duplicate or state conflict. 422 reports invalid fields. 429 means an action is being requested too frequently. Forms display errors without simulating successful writes.
 
-Автор всегда из сессии. Уникальна пара автор-членство + сотрудник-членство одной команды. Другие админы и сотрудники не получают эту запись ни через данный endpoint, ни через профили/GOAT/общие списки.
-
-## 6. Сводка и GOAT — позже
-
-- GET /teams/{team_id}/dashboard?month=YYYY-MM — админские counts, нагрузка, ближайшие сроки, график с историей событий. Доступ только admin.
-- GET /teams/{team_id}/goat?month=YYYY-MM — сотруднику лучшие и собственный результат; админу также худшие. Можно разделить публичный и админский маршруты.
-- Ответ рейтинга: month, team_time_zone, min_evaluated=5, leaders=[], personal={score:null, rank:null, evaluated:0}, eligible_count. Поле worst допустимо только в админском ответе.
-- Веса 0.6/0.4 согласованы, точная формула/знаменатели и правила месяца ещё требуют решения. Вернуть score=null до готовности расчёта.
-- Для первоначальной интеграции допустимо обновление списка после действия/при возвращении на вкладку. WebSocket не нужен для первой рабочей цепочки.
-
-## Интеграция с браузером
-
-Сессия предлагается HttpOnly cookie, Secure на HTTPS, SameSite в соответствии с расположением фронта/API и CSRF-защита на изменениях. CORS разрешает только реальные origins, а не wildcard с cookie. [Документация FastAPI CORS](https://fastapi.tiangolo.com/tutorial/cors/).
-
-Для подключения достаточно передать адрес API и OpenAPI. Настройку URL и HTTP-клиент я добавлю на фронте после готовности первого блока; простое копирование этой папки рядом с Python ещё не соединяет приложения.
+Lists refresh after mutations, when focus returns, and every 30 seconds while the tab is visible. Ratings and historical charts are not reconstructed from current deadlines in the browser. This version does not require WebSocket.

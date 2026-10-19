@@ -10,10 +10,10 @@ import secrets
 import hashlib
 
 hasher = PasswordHash.recommended()
-#функция хеширования
+# Hash a password before storage.
 def hash_password(password:str):
     return hasher.hash(password)
-#функция проверки пароля(при входе в аккаунт) сравнивается введенный пароль с тем хешем пароля который уже хранитсья в бд
+# Compare the submitted password with the stored password hash at sign-in.
 def verify_password(password:str, hashed_password:str)->bool:
     return hasher.verify(password, hashed_password)
 
@@ -35,7 +35,7 @@ def register_user(session:SessionDep,user_data:UserCreateSchema):
         if isinstance(error.orig, UniqueViolation):
             raise HTTPException(
                 status_code=409,
-                detail="Логин или почта уже заняты"
+                detail="Username or email is already taken"
             )
 
         raise
@@ -48,12 +48,12 @@ def authenticate_user(session:SessionDep,user_data:UserLoginSchema):
     if user is None:
         raise  HTTPException(
             status_code=401,
-            detail='Введен неверный логин или пароль'
+            detail='Incorrect username or password'
          )
     if not verify_password(user_data.password, user.password_hash):
         raise HTTPException(
             status_code=401,
-            detail='Введен неверный логин или пароль'
+            detail='Incorrect username or password'
         )
     return user
 

@@ -18,7 +18,7 @@ def find_password_reset_by_token(session:SessionDep,token,lock=False):
         query=query.with_for_update()
     find_token=query.first()
     if find_token is None:
-        raise HTTPException(status_code=404, detail='Токен сброса пароля не найден.')
+        raise HTTPException(status_code=404, detail='Password reset token not found.')
     else:
         return find_token
 
@@ -26,19 +26,19 @@ def check_password_reset_token(token_record):
     now= datetime.now(timezone.utc)
 
     if token_record.used_at is not None:
-        raise HTTPException(status_code=409,detail='Токен уже использован.')
+        raise HTTPException(status_code=409,detail='The token has already been used.')
     elif token_record.revoked_at is not None:
-        raise HTTPException(status_code=409,detail='Токен отменён.')
+        raise HTTPException(status_code=409,detail='The token has been revoked.')
     elif token_record.expires_at<=now:
-        raise HTTPException(status_code=409,detail='Срок действия токена истёк.')
+        raise HTTPException(status_code=409,detail='The token has expired.')
     else:
         return token_record
 
 def send_password_reset_email(user,token):
     URL=f'{FRONTEND_URL}/reset-password?token={token}'
     to_email=user.email
-    subject='Сброс пароля — DeathLine'
-    text=f'Для сброса пароля перейдите по ссылке…\n{URL}\nСсылка действительна 1 час.'
+    subject='Reset your password — DeathLine'
+    text=f'Follow this link to reset your password:\n{URL}\nThis link is valid for 1 hour.'
     message=build_email_message(to_email, subject, text)
     send_email(message)
 
@@ -51,7 +51,7 @@ def create_password_reset_token(session:SessionDep,user):
 
     time_send=session.query(PasswordResetTokens).filter(PasswordResetTokens.user_id==user.id).order_by(PasswordResetTokens.created_at.desc()).first()
     if (time_send is not None) and (time_send.created_at+timedelta(seconds=60)>now):
-        raise HTTPException(status_code=429,detail='Повторную отправку можно запросить через минуту.')
+        raise HTTPException(status_code=429,detail='Please wait a minute before requesting another email.')
 
     try:
         for old_token in old_tokens:
@@ -105,7 +105,7 @@ def reset_password(session:SessionDep,token,new_password):
     check_password_reset_token(token_record)
 
     if user.email!=token_record.email:
-        raise HTTPException(status_code=409,detail='Адрес почты изменён')
+        raise HTTPException(status_code=409,detail='The email address has changed')
 
     try:
         password_hash=hash_password(new_password)

@@ -16,7 +16,7 @@ def find_note_employee(session:SessionDep,team_id,employee_member_id,lock=False)
     employee_teams_member=query.first()
 
     if employee_teams_member is None:
-        raise HTTPException(status_code=404,detail="Участник не найден")
+        raise HTTPException(status_code=404,detail="Member not found")
     else:
         return employee_teams_member
 def get_private_worker_note(session:SessionDep,team_id,employee_member_id,author_member_id):

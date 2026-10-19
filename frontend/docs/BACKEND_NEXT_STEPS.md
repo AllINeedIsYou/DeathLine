@@ -1,84 +1,64 @@
-# Что делать с бэкендом DeathLine
+# Backend milestones
 
-План для владельца бэкенда, 11 октября 2026. Python-код не менялся. Предлагаемые имена маршрутов можно согласовать до подключения; переписывать весь бэкенд сразу не нужно.
+Updated October 20, 2026. The core backend blocks are implemented and connected to the frontend. This document records their responsibilities and the remaining work. See [the frontend README](../README.md) for setup and [the API contract](API_CONTRACT.md) for current routes.
 
-## Что есть сейчас и почему этого мало
+## 1. Accounts and sessions — complete
 
-В локальном проекте `backend/DataBase/models.py` есть Workers: имя, role, tg, одна строка task, один deadline и deadline_point. Маршруты `create_worker`, `get_workers`, `add_time_and_task/{worker_id}`, `del_time`, `del_task` работают вокруг одной записи работника. Несколько операций возвращают текст вместо объекта.
+Users have an ID, display name, unique username and email, password hash, optional phone and Telegram, time zone, creation timestamp, and email verification timestamp.
 
-Интерфейсу нужно много независимых задач одного сотрудника, история выполнения, команда с несколькими админами, аккаунты, приглашения и личные заметки. Поэтому главная перемена — **задача становится отдельной записью**, а роль доступа отделяется от должности.
+Passwords are hashed with pwdlib/Argon2. Session tokens are random; the database stores their SHA-256 hashes. The browser receives an HttpOnly cookie. Current-user dependencies resolve the session and enforce authentication.
 
-Локальная ветка на момент передачи отличается от GitHub. Перед работой выбери актуальную версию бэка у себя; фронт добавлен отдельно и эти различия не объединяет.
+Registration, sign-in, sign-out, email verification, resending verification, password recovery, and profile editing are implemented. Verification and recovery tokens are single-use and time-limited. Reissuing a token revokes older active tokens. Password reset also removes existing sessions.
 
-## Этап 1. Модели и миграция
+The shared password validator applies to registration and recovery: 8–128 characters, at least one uppercase letter and one special character. Whitespace is not special. Existing passwords remain usable at sign-in. A separate authenticated password-change endpoint is not implemented; email-based recovery is available.
 
-| Таблица | Минимальные поля |
-| --- | --- |
-| users | id, name, username (unique), email (unique), password_hash, email_verified_at, phone nullable, telegram nullable, time_zone |
-| teams | id, name, time_zone, created_at |
-| team_memberships | id, team_id, user_id, role (admin/employee), job_title, joined_at; unique(team_id, user_id) |
-| tasks | id, team_id, assignee_membership_id, title, description, priority (high/medium/low), deadline, created_at, updated_at, completed_at nullable |
-| invitations | id, team_id, email, role, token_hash, created_by_membership_id, created_at, expires_at, accepted_at nullable, revoked_at nullable |
-| private_worker_notes | id, team_id, author_membership_id, employee_membership_id, text, updated_at; unique(author_membership_id, employee_membership_id) |
+## 2. Teams and memberships — complete
 
-Начни с первых четырёх таблиц. Приглашения и заметки добавишь отдельными миграциями. Существующие task/deadline перенеси из Workers в Tasks отдельными строками, не удаляя всю базу. Привязку старых работников к аккаунтам решай явно: не создавай им выдуманные пароли.
+Teams have their own calendar time zone. Creating a team adds its creator as an administrator. The unique `(team_id, user_id)` membership identifies an account's role and optional job title in that team.
 
-`role` в членстве — права, а `job_title` — «дизайнер»/«разработчик». Один аккаунт может быть админом в одной команде и сотрудником в другой. В интерфейсе пока нет выбора нескольких команд; сначала достаточно одной активной команды.
+An account ID and a membership ID are different identifiers. Task assignment uses the account ID; member profile, private-note, statistics, and history routes use the membership ID. The interface shows administrator and employee roles explicitly, separately from job titles.
 
-Внешний ключ исполнителя должен указывать на участника той же команды. В админке выбираем участника команды, а не произвольный user_id. Для описания связи «один ко многим» есть [документация SQLAlchemy](https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html).
+## 3. Tasks — complete
 
-## Этап 2. Настоящий вход
+Each task belongs to one team and one assignee who must belong to that team. Tasks have a title, optional description, priority, aware deadline, and creation/update/completion timestamps.
 
-Сделай `/auth/register`, `/auth/login`, `/auth/me`, `/auth/logout`, подтверждение почты и повторное письмо. Логин/почта уникальны; пароль хранится только хешем. Возвращай аккаунт и членства, по которым фронт определит кабинет. Админская роль не выдаётся по полю из формы регистрации: первый админ появляется при создании команды, следующие роли — по приглашению.
+Administrators create and edit tasks. Assignees complete their own tasks, including overdue ones. Repeated completion preserves the original completion time. Completed tasks cannot be edited through the normal task editor.
 
-Для браузера предлагаю серверную сессию в HttpOnly cookie: Secure на HTTPS, подходящий SameSite и защита изменяющих запросов от CSRF. Фронт будет отправлять credentials. Необходимы зависимость current_user и проверки членства/роли на сервере. Про хеширование паролей и проверку пользователя — [руководство FastAPI](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/); JWT из примера не обязателен, если выбираем серверную сессию.
+PATCH changes only supplied fields. Empty PATCH requests preserve `updated_at`. An unchanged overdue deadline does not prevent title or assignee changes. New deadlines must be in the future and include a time zone.
 
-**После готовности входа передай мне адрес API и `/openapi.json`. Я подключу вход и автоматическое открытие нужного кабинета.** Не нужно сначала заканчивать все остальные функции.
+## 4. Invitations — complete
 
-## Этап 3. Первая рабочая цепочка задач
+Administrators invite a specific email as an employee or administrator. Seven-day invitation links contain random tokens; only hashes are stored. Recipients need an authenticated account with the matching verified email. Acceptance creates membership and consumes the invitation atomically.
 
-Достаточно загрузки участников и шести операций из контракта: список задач, одна задача, создание, изменение, выполнение, список участников. Админ создаёт задачу на участника; сотрудник получает только свои задачи; выполнение возвращает обновлённый объект админу при обновлении списка.
+Administrators can inspect statuses and revoke invitations. Expired or revoked links do not become valid again. Duplicate active invitations and invitations for existing members are rejected. Raw links are available when created; lost links are replaced by revoking the old invitation and creating a new one.
 
-- Новая задача: обязательны название, исполнитель, приоритет и будущий дедлайн.
-- Обычное редактирование: название, описание, исполнитель, приоритет, дедлайн. Нельзя менять команду задачи этим запросом.
-- Выполнение: сервер ставит completed_at своим временем. Повторный запрос не меняет исходный момент завершения.
-- Просроченную незавершённую задачу можно выполнить; статус станет completed, а late останется true.
-- Завершённую задачу через текущую форму редактировать нельзя. Повторное открытие задачи в работу сейчас не предусмотрено.
-- Переназначенную задачу старый исполнитель завершить не может. Сотрудник не может выдавать себя за другого через worker_id.
+## 5. Profiles and private notes — complete
 
-Состояние вычисляется из двух полей: если completed_at задан — completed; иначе deadline <= server_now — overdue; иначе active. Для этого не нужен постоянно работающий браузер. Если deadline_point оставить для совместимости, он должен быть производным значением, а не вторым независимым источником статуса.
+Users edit their own name, contacts, and time zone. Administrators can read member profiles and change or clear job titles. They cannot silently change another account's identity or email.
 
-Все даты храни как timezone-aware UTC и передавай ISO 8601 с Z/смещением. Часовой пояс пользователя — IANA (например Europe/Moscow), отдельно от абсолютного времени дедлайна. Сравнение `completed_at > deadline` означает «Выполнено с просрочкой»; равенство — в срок. В ответах возвращай server_now, чтобы фронт мог учесть разницу часов.
+A private note belongs to its author membership and target membership within one team. It is optional and limited to 4000 characters. Other administrators and employees cannot access that author's note through profiles, lists, ratings, or note routes.
 
-**После этого передай обновлённый OpenAPI. Я подключу задачи, перенос срока и выполнение.** Прямые адреса пустых кабинетов после подключения будут защищены проверкой сессии; права всё равно проверяются сервером.
+## 6. Statistics, GOAT, and history — complete
 
-## Этап 4. Команды и приглашения
+The server calculates productivity and punctuality. Monthly GOAT requires at least five completed or unfinished overdue tasks. Scores combine 60% productivity and 40% punctuality. Future open tasks do not reduce the current score. Late completion counts as completed but lowers punctuality.
 
-Создание команды добавляет создателя как admin. Админ приглашает конкретную почту, выбирает employee/admin. Сервер выдаёт случайный одноразовый токен, возвращает ссылку вида `https://<frontend>/invite/<token>`, хранит хеш токена. Срок — 7 дней. Письма можно добавить отдельно: админ уже может копировать ссылку, но подтверждение почты должно быть настоящим.
+Tasks belong to the month of their deadline in the team's time zone. Ratings may update after late completion. Equal scores share ranks; insufficient data stays null, while an actual zero remains visible.
 
-Получатель регистрируется/входит и принимает приглашение подтверждённым аккаунтом с нужной почтой. Принятие приглашения и создание членства выполняются атомарно. Отмена делает старую ссылку недействительной; повторное приглашение создаёт новую. Действующее приглашение-дубликат на ту же почту в команде не создаётся. Админ видит актуальный статус.
+Administrators receive the full ranking. Other members receive only the leaders and their personal result. The interface does not single out a lowest-rated person when everyone ties or only one person qualifies.
 
-## Этап 5. Анкеты и личные заметки
+Task creation, update, and completion record immutable event snapshots in the same transaction. Daily charts reconstruct historical deadlines and assignees, account for calendar boundaries and daylight saving, omit future points, and use null for unknown older states. Missing history is drawn as gaps.
 
-Участнику нужны имя, должность, email, Telegram, телефон, часовой пояс. Email аккаунта меняется отдельным подтверждённым процессом; админский редактор не должен незаметно менять чужой адрес входа. Перед интеграцией уточним, является ли редактируемая почта отдельным рабочим контактом или адресом аккаунта.
+## 7. Frontend integration — complete
 
-Заметка опциональная, до 4000 символов. Автор определяется текущей сессией, не параметром admin_id из браузера. Запросы одного админа возвращают только его запись об этом сотруднике. Другой админ и сам сотрудник её не получают, включая общие ответы профиля/команды/GOAT.
+The frontend uses cookie-authenticated API requests, protected routes, team switching, real mutations, field errors, and loading/retry states. It refreshes after actions, when the window regains focus, and every 30 seconds in a visible tab. It contains no demo business records or browser-local task storage.
 
-## Этап 6. GOAT и графики
+The integrated browser checks use real API routes, a temporary database, and captured emails. PostgreSQL mode creates and removes its own separate test database. Working application data and real email delivery are not used by these checks.
 
-Рейтинг считает сервер. Согласованы веса: 60% продуктивность, 40% пунктуальность; минимум 5 выполненных или просроченных задач за календарный месяц. Но точные знаменатели продуктивности/пунктуальности, учёт позднего завершения, переноса сроков и границы месяца ещё надо зафиксировать. Не переноси старые демонстрационные баллы в бэкенд.
+## Remaining work
 
-Командный часовой пояс задаёт границы месяца одинаково для всех. Публичный ответ содержит лучших и личный результат текущего пользователя; худшие — только в админском ответе. При недостатке задач score/rank = null, не выдуманное место. При равных результатах можно вернуть нескольких лидеров; когда все равны или участник один, худшего не выделяем.
+- Public hosting and deployment configuration, including HTTPS, cookie settings, explicit CORS origins, and further API hardening.
+- Database migrations for future schema changes.
+- A dedicated backend dependency manifest.
+- An authenticated password-change flow if added to the product scope.
 
-Для честного графика за прошлые дни нужна история событий задач (создание, перенос срока, переназначение, завершение) либо дневные снимки. Текущий deadline не восстановит прошлую просрочку после переноса. Нужен отдельный серверный агрегат истории; текущую визуальную сводку фронта не используй как финансово/кадрово значимый исторический отчёт.
-
-## Что присылать мне после каждого этапа
-
-1. Адрес сервера, например http://127.0.0.1:8000.
-2. `/openapi.json` или актуальная Swagger-документация.
-3. Коротко: что готово и как авторизоваться в локальной разработке. Не публикуй реальные пароли и секреты в репозитории.
-4. Два локальных аккаунта/членства, созданных тобой: админ и сотрудник одной команды. Если не хочешь готовить их вручную, сделай отдельное средство локального наполнения вне production API.
-
-Для разных адресов фронта и API настрой CORS на конкретные origins разработки, включая http://127.0.0.1:5173 и/или http://localhost:5173, с поддержкой credentials. Origin включает порт; `*` не заменяет разрешённые адреса для cookie-входа. См. [FastAPI CORS](https://fastapi.tiangolo.com/tutorial/cors/).
-
-Сейчас фронт не делает API-запросов; его подключение — следующий отдельный этап. Предлагаемый JSON и маршруты находятся в [API_CONTRACT.md](API_CONTRACT.md).
+The development-only database reset router is not registered in the public application. Database connection credentials are loaded from the ignored local `.env`.

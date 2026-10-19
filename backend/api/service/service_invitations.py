@@ -8,16 +8,16 @@ from DataBase.database import SessionDep
 from api.shemas import TeamInvitationCreateSchema, TeamInvitationListItemSchema, TeamInvitationPreviewSchema
 from DataBase.models import Teams, TeamMembers, Users, TeamInvitations
 from fastapi import HTTPException
-#создания токена и приглашения полтзователя по email
+# Create an invitation and a token for the recipient email.
 def create_team_invitation(session: SessionDep, team_data:TeamInvitationCreateSchema,team_id:int,creator_id:int):
     now=datetime.now(timezone.utc)
     team_email=session.query(TeamMembers).join(Users, TeamMembers.user_id == Users.id).filter(Users.email == team_data.email,TeamMembers.team_id==team_id).first()
     TI=session.query(TeamInvitations).filter(TeamInvitations.email == team_data.email,TeamInvitations.team_id==team_id, TeamInvitations.expires_at>now, TeamInvitations.accepted_at.is_(None),TeamInvitations.revoked_at.is_(None)).first()
 
     if TI is not None:
-        raise HTTPException(status_code=409, detail="Действующее приглашение уже существует")
+        raise HTTPException(status_code=409, detail="An active invitation already exists")
     if team_email is not None:
-        raise HTTPException(status_code=409, detail="Пользователь уже состоит в команде")
+        raise HTTPException(status_code=409, detail="The user is already a member of this team")
 
     token=secrets.token_urlsafe(32)
     token_hash=hashlib.sha256(token.encode()).hexdigest()
@@ -41,7 +41,7 @@ def create_team_invitation(session: SessionDep, team_data:TeamInvitationCreateSc
 
     session.refresh(Invite)
     return Invite,token
-#проверяем статус
+# Determine the invitation status.
 def get_invitation_status(invitation: TeamInvitations):
     if invitation.accepted_at is not None:
         return 'accepted'
@@ -51,7 +51,7 @@ def get_invitation_status(invitation: TeamInvitations):
         return 'expired'
     else:
         return 'pending'
-# получаем все заявки команды ||||||| order_by(TeamInvitations.created_at.desc()) фильтрует по дате создание от большего к меньшему
+# List team invitations ordered from newest to oldest.
 def get_team_invitations(session: SessionDep, team_id:int):
     invitions=session.query(TeamInvitations).filter(TeamInvitations.team_id==team_id).order_by(TeamInvitations.created_at.desc()).all()
     all_invitions=[]
@@ -70,7 +70,7 @@ def get_team_invitations(session: SessionDep, team_id:int):
         )
         all_invitions.append(inv)
     return all_invitions
-# поиск приглашения в определеной команде по id приглоса
+# Look up an invitation by its ID within the team.
 def find_team_invitation(session: SessionDep, team_id:int, invitation_id:int,lock:bool=False):
     query=session.query(TeamInvitations).filter(TeamInvitations.team_id==team_id,TeamInvitations.id==invitation_id)
 
@@ -80,15 +80,15 @@ def find_team_invitation(session: SessionDep, team_id:int, invitation_id:int,loc
     invite_team=query.first()
 
     if invite_team is None:
-        raise HTTPException(status_code=404,detail='Приглашение не найдено')
+        raise HTTPException(status_code=404,detail='Invitation not found')
 
     return invite_team
-#отменяет заявку
+# Revoke an invitation.
 def revoke_team_invitation(session: SessionDep, team_id:int, invitation_id:int):
     invite_team=find_team_invitation(session,team_id,invitation_id,lock=True)
     status=get_invitation_status(invite_team)
     if status=='expired' or status=='accepted':
-        raise HTTPException(status_code=409,detail='Приглашение уже принято или срок истёк')
+        raise HTTPException(status_code=409,detail='The invitation has already been accepted or has expired')
     if status=='pending':
         invite_team.revoked_at=datetime.now(timezone.utc)
         session.commit()
@@ -96,19 +96,19 @@ def revoke_team_invitation(session: SessionDep, team_id:int, invitation_id:int):
         return invite_team
     if status=='revoked':
         return invite_team
-#поиск заявки по токену
+# Look up an invitation by token.
 def find_invitation_by_token(session: SessionDep, token:str, lock:bool=False):
     token_hash=hashlib.sha256(token.encode()).hexdigest()
 
     query=session.query(TeamInvitations).filter(TeamInvitations.token_hash==token_hash)
     if lock:
-        query=query.with_for_update()#блокировка строка приглашения до комита
+        query=query.with_for_update()# Lock the invitation row until commit or rollback.
 
     finde_token=query.first()
     if finde_token is None:
-        raise HTTPException(status_code=404,detail='Приглашение не найдено')
+        raise HTTPException(status_code=404,detail='Invitation not found')
     return finde_token
-#получаем имя команды, куда вствупает пользовтель по токену + формируем форму ответа(preview)
+# Build the public invitation preview, including the team name.
 def get_invitation_preview(session:SessionDep,token:str):
     find_token=find_invitation_by_token(session, token)
     team_name=session.query(Teams).filter(Teams.id==find_token.team_id).first()
@@ -124,16 +124,16 @@ def get_invitation_preview(session:SessionDep,token:str):
         status=get_invitation_status(find_token)
     )
     return preview
-#проверяем сопадает ли email юзера и email указанный в приглосе
+# Require the user's email to match the invitation recipient.
 def check_invitation_for_user(invitation,user):
     if get_invitation_status(invitation) != 'pending':
         raise HTTPException(status_code=409)
     if invitation.email != user.email:
         raise HTTPException(status_code=403)
     if user.email_verified_at is None:
-        raise HTTPException(status_code=403, detail="Подтвердите почту")
+        raise HTTPException(status_code=403, detail="Please verify your email")
     return invitation
-#потверждение пришглоса и добавления пользователя в комнаду бд(TeamMembers)
+# Accept the invitation and add the user to TeamMembers.
 def accept_team_invitation(session:SessionDep,token:str,user):
     find_token=find_invitation_by_token(session, token,lock=True)
 
@@ -141,7 +141,7 @@ def accept_team_invitation(session:SessionDep,token:str,user):
 
     member=session.query(TeamMembers).filter(TeamMembers.user_id==user.id,TeamMembers.team_id==find_token.team_id).first()
     if member is not None:
-        raise HTTPException(status_code=409,detail='Пользователь уже состоит в команде')
+        raise HTTPException(status_code=409,detail='The user is already a member of this team')
 
     now = datetime.now(timezone.utc)
     find_token.accepted_at = now

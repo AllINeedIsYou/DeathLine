@@ -4,6 +4,7 @@ from DataBase.models import priorities, TeamRole
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic import field_validator
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from api.validators import validate_password
 #=========================================================
 
 class TaskCreateSchema(BaseModel):
@@ -38,12 +39,18 @@ class UserCreateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     name:str= Field(max_length=80, min_length=1)
-    username: str= Field(max_length=40, min_length=3,pattern=r"^[a-zA-Z0-9_.-]+$", description="3-40 символов: латиница, цифры, _, ., -",examples=['johndoe'])
+    username: str= Field(max_length=40, min_length=3,pattern=r"^[a-zA-Z0-9_.-]+$", description="3–40 characters: Latin letters, digits, _, ., -",examples=['johndoe'])
     email: EmailStr
     password: str=Field(max_length=128,min_length=8)
     phone:PhoneNumber|None=None
     telegram:str|None=Field(default=None, max_length=33,min_length=1,description='@username')
     timezone: str = Field(min_length=1, max_length=40)
+
+    @field_validator('password')
+    @classmethod
+    def password_validator(cls, value):
+        return validate_password(value)
+
     @field_validator('timezone')
     @classmethod
     def timezone_validator(cls, value:str):
@@ -51,7 +58,7 @@ class UserCreateSchema(BaseModel):
             ZoneInfo(value)
 
         except (ZoneInfoNotFoundError, ValueError):
-            raise ValueError("Укажите существующий часовой пояс")
+            raise ValueError("Enter a valid time zone")
         return value
 
 class UserResponseSchema(BaseModel):
@@ -86,7 +93,7 @@ class UserUpdateSchema(BaseModel):
             ZoneInfo(value)
 
         except (ZoneInfoNotFoundError, ValueError):
-            raise ValueError("Укажите существующий часовой пояс")
+            raise ValueError("Enter a valid time zone")
         return value
 #=========================================================
 
@@ -102,7 +109,7 @@ class TeamCreateSchema(BaseModel):
             ZoneInfo(value)
 
         except (ZoneInfoNotFoundError, ValueError):
-            raise ValueError("Укажите существующий часовой пояс")
+            raise ValueError("Enter a valid time zone")
         return value
 
 
@@ -178,6 +185,12 @@ class PasswordResetRequestSchema(BaseModel):
 class PasswordResetConfirmSchema(BaseModel):
     token:str=Field(min_length=1)
     new_password:str=Field(min_length=8,max_length=128)
+
+    @field_validator('new_password')
+    @classmethod
+    def password_validator(cls, value):
+        return validate_password(value)
+
 #=========================================================
 class PrivateWorkerNoteWriteSchema(BaseModel):
     model_config=ConfigDict(str_strip_whitespace=True)
@@ -226,3 +239,21 @@ class GoatUserResponseSchema(BaseModel):
     timezone: str
     leaders: list[GoatMemberResponseSchema]
     my_result: GoatMemberResponseSchema
+
+
+class TaskHistoryPointSchema(BaseModel):
+    at: datetime
+    created: int | None = Field(description='Number of tasks that existed at this point. For a member, tasks assigned to them at that point; null if the assignee is unknown.')
+    completed: int | None = Field(description='Number of tasks completed by this point; null if assignee history is incomplete.')
+    overdue: int | None = Field(description='Number of unfinished overdue tasks at this point; null if history is incomplete.')
+
+
+class TaskHistoryResponseSchema(BaseModel):
+    team_id: int
+    member_id: int | None = None
+    year: int
+    month: int
+    timezone: str
+    as_of: datetime
+    history_complete: bool
+    points: list[TaskHistoryPointSchema]

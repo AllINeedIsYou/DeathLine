@@ -1,100 +1,89 @@
-![DeathLine — задачи, команда, время](docs/assets/readme-cover.svg)
+![DeathLine — tasks, teams, time](docs/assets/readme-cover.svg)
 
 <p align="center">
-  <strong>Дедлайны под контролем.</strong><br>
-  Сервис для команд, в котором у каждой задачи есть исполнитель, срок и результат.
+  <strong>Keep deadlines under control.</strong><br>
+  A team workspace where every task has an owner, a deadline, and a result.
 </p>
 
 <p align="center">
-  <a href="#возможности">Возможности</a> ·
-  <a href="#состояние-проекта">Статус</a> ·
-  <a href="#локальный-запуск">Запуск</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#project-status">Status</a> ·
+  <a href="#local-setup">Setup</a> ·
   <a href="#api">API</a> ·
-  <a href="#планы">Планы</a>
+  <a href="#roadmap">Roadmap</a>
 </p>
 
 ---
 
-## Знакомьтесь, DeathLine
+## Meet DeathLine
 
-<img align="right" src="frontend/public/brand/deathline-logo.png" alt="Логотип DeathLine" width="112">
+<img align="right" src="frontend/public/brand/deathline-logo.png" alt="DeathLine logo" width="112">
 
-DeathLine объединяет задачи, участников команды и дедлайны. Администратор распределяет работу и следит за сроками. Сотрудник видит свои задачи, ближайший дедлайн и отмечает результат.
+DeathLine brings tasks, teammates, and deadlines into one workspace. Administrators assign work and monitor progress. Employees see their own tasks, focus on the next deadline, and mark their work as completed.
 
-У проекта свой характер: тёмный интерфейс, голубые акценты, живые таймеры и отключаемые глитчи. За оформлением — конкретная идея: **видеть, что нужно сделать, кто за это отвечает и сколько времени осталось**.
+A dark interface, cyan accents, live timers, and optional glitch effects give the project its character. The goal is practical: **know what needs to be done, who owns it, and how much time is left**.
 
-## Возможности
+## Features
 
-| Для администратора | Для сотрудника |
+| For administrators | For employees |
 | :--- | :--- |
-| Создание команды и приглашение участников | Вступление в команду по ссылке |
-| Назначение задач, приоритетов и дедлайнов | Список своих задач и ближайший срок |
-| Изменение задач и перенос сроков | Завершение назначенных задач |
-| Просмотр задач и участников команды | Доступ к своим задачам в рамках команды |
+| Create teams and invite members | Join a team using a personal invitation |
+| Assign tasks, priorities, and deadlines | See assigned tasks and the next deadline |
+| Edit tasks and reschedule deadlines | Complete assigned tasks |
+| Review team workload, statistics, and history | See GOAT leaders and a personal rating |
+| Manage job titles and private notes | Edit personal contact details and time zone |
 
-**Аккаунты:** регистрация, вход, выход, подтверждение почты и восстановление пароля через письмо. При успешном сбросе пароля старые сессии завершаются, ссылка становится недействительной.
+**Accounts:** registration, sign-in, sign-out, email verification, and password recovery. A successful password reset invalidates existing sessions and consumes the reset token. New passwords require 8–128 characters, an uppercase letter, and a special character.
 
-**Команды:** права администратора и сотрудника определяются членством. Один аккаунт может состоять в нескольких командах с разными ролями. Приглашение привязано к почте и может быть принято или отменено.
+**Teams:** administrator and employee roles belong to memberships. An account can join multiple teams with different roles. Invitations are email-bound, expire after seven days, and can be revoked. The directory distinguishes team roles from job titles.
 
-**Задачи:** отдельные записи с исполнителем, приоритетом, дедлайном и датами создания, изменения и завершения. Истечение срока не завершает задачу автоматически.
+**Tasks:** each task has an assignee, priority, deadline, and creation/update/completion timestamps. An overdue task stays open until its assignee completes it. Task events preserve historical deadlines and assignments.
 
-## Состояние проекта
+**GOAT:** monthly scores combine 60% productivity and 40% punctuality. Members need at least five completed or overdue tasks to qualify. The server uses the deadline month in the team's time zone; equal scores share a rank.
 
-**Проект в разработке.** Интерфейс подготовлен, основные сценарии API реализованы. Подключение интерфейса к серверу — следующий отдельный этап: сейчас фронтенд открывается с пустыми данными и не выполняет серверные операции.
+**Privacy:** administrators only see their own private notes. Employees receive their own tasks, the ranking leaders, and their personal result. Server-side membership and role checks enforce access.
 
-| Часть | Состояние |
+## Project status
+
+**The local application is connected end to end.** The interface uses real FastAPI data for accounts, teams, invitations, tasks, profiles, notes, statistics, ratings, and charts. Public deployment is a separate step.
+
+| Area | Status |
 | :--- | :--- |
-| Кабинеты администратора и сотрудника, задачи, приглашения | Интерфейс подготовлен |
-| Регистрация, сессии и подтверждение почты | Реализованы в API |
-| Отправка писем и восстановление пароля | Реализованы в API, проверены с реальными письмами |
-| Команды, членства и приглашения | Реализованы в API |
-| Создание, чтение, изменение и выполнение задач | Реализованы в API |
-| Редактирование профиля, личные заметки, GOAT | Следующие блоки бэкенда |
-| Интеграция фронтенда и API | В плане |
+| Admin and employee workspaces | Connected to the API |
+| Registration, sessions, and email verification | Implemented and integrated |
+| Email delivery and password recovery | Implemented; real email delivery previously verified |
+| Team creation, switching, and invitations | Implemented and integrated |
+| Task creation, editing, and completion | Implemented and integrated |
+| Profiles, private notes, statistics, GOAT, and history | Implemented and integrated |
+| Browser integration checks | Passed against an isolated PostgreSQL database |
 
-## Стек
+## Stack
 
-| Слой | Технологии |
+| Layer | Technologies |
 | :--- | :--- |
-| Интерфейс | React 18 · TypeScript · Vite · CSS |
+| Interface | React 18 · TypeScript · Vite · CSS |
 | API | Python 3.14 · FastAPI · Pydantic 2 |
-| Данные | PostgreSQL · SQLAlchemy · psycopg |
-| Авторизация | Серверные сессии · HttpOnly cookie · pwdlib / Argon2 |
-| Почта | SMTP через TLS · Gmail · одноразовые ссылки |
+| Data | PostgreSQL · SQLAlchemy · psycopg |
+| Authentication | Server-side sessions · HttpOnly cookies · pwdlib / Argon2 |
+| Email | SMTP over TLS · Gmail · single-use links |
 
-## Локальный запуск
+## Local setup
 
-Понадобятся **Python 3.14**, **Node.js 22+ / npm** и **PostgreSQL**. Команды ниже предполагают запуск из корня репозитория, если не указано другое.
+You need **Python 3.14**, **Node.js 22+**, and **PostgreSQL**. Start in the repository root unless a command specifies otherwise.
 
-### Фронтенд
+### Backend
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Откройте [http://127.0.0.1:5173](http://127.0.0.1:5173). Для сборки используйте `npm run build`; результат появится в `frontend/dist/`.
-
-<details>
-<summary><strong>Бэкенд: окружение, база данных и почта</strong></summary>
-
-Создайте виртуальное окружение и установите зависимости. Пример для macOS / Linux:
-
-```bash
+```sh
 python3.14 -m venv .venv
 source .venv/bin/activate
 python -m pip install fastapi 'uvicorn[standard]' sqlalchemy 'psycopg[binary]' \
   'pwdlib[argon2]' 'pydantic[email]' pydantic-extra-types phonenumbers python-dotenv
 ```
 
-В текущей версии проекта файл зависимостей ещё не оформлен; команда выше перечисляет пакеты, которые используются бэкендом.
-
-Создайте базу PostgreSQL и укажите собственные параметры подключения в [`backend/DataBase/database.py`](backend/DataBase/database.py). Сейчас подключение задаётся в этом файле.
-
-Создайте `backend/.env` с настройками почты. Значения пользователя и пароля в примере необходимо заменить:
+Create your PostgreSQL database and copy [`backend/.env.example`](backend/.env.example) to `backend/.env`. Set your own connection URL and SMTP credentials:
 
 ```dotenv
+DATABASE_URL=postgresql+psycopg://username:password@127.0.0.1:5432/deathline
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_USER=your-project@gmail.com
@@ -103,94 +92,101 @@ SMTP_FROM_NAME=DeathLine
 FRONTEND_URL=http://127.0.0.1:5173
 ```
 
-Для Gmail используется пароль приложения. `.env` остаётся локальным и не добавляется в Git. `FRONTEND_URL` определяет адрес ссылок в письмах.
+For Gmail, use an app password. The local `.env` is ignored by Git. `FRONTEND_URL` sets the destination of verification, password-reset, and invitation links. Connection credentials are loaded from the environment, not embedded in source code.
 
-Для Python с python.org на macOS завершите установку сертификатов через `/Applications/Python 3.14/Install Certificates.command`, если этот шаг ещё не выполнен. Подробности — в [документации Python](https://docs.python.org/3.14/using/mac.html#installation-steps).
+On macOS, a python.org installation may require `/Applications/Python 3.14/Install Certificates.command` to complete certificate setup. See the [Python installation guide](https://docs.python.org/3.14/using/mac.html#installation-steps).
 
-В активированном окружении перейдите в `backend` и создайте недостающие таблицы:
+Create missing tables without clearing existing data:
 
-```bash
+```sh
 cd backend
 python - <<'PY'
 from DataBase.database import Base, engine
 from DataBase import models
-
 Base.metadata.create_all(bind=engine)
 PY
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-`create_all` создаёт отсутствующие таблицы; существующие записи сохраняются. Изменение структуры уже созданных таблиц требует отдельной миграции.
+Changes to existing database columns require a migration; `create_all` only creates missing tables. Backend dependencies are currently listed in the installation command above rather than a dedicated requirements file.
 
-Запустите API **из папки `backend`**:
+### Frontend
 
-```bash
-python -m uvicorn main:app --reload
+In another terminal:
+
+```sh
+cd frontend
+npm install
+npm run dev
 ```
 
-Документация доступна по адресу [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs), OpenAPI — [http://127.0.0.1:8000/openapi.json](http://127.0.0.1:8000/openapi.json).
+Alternatively, use `pnpm install --frozen-lockfile` and `pnpm dev`. Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Vite proxies `/api` to the backend on port 8000, keeping local browser requests on one origin. Verification and reset links open dedicated frontend pages.
 
-Страницы фронтенда `/verify-email` и `/reset-password` ещё предстоит подключить. Пока токен из письма можно передать в соответствующий запрос через Swagger.
-
-</details>
+`npm run build` produces `frontend/dist/`; `npm run preview` serves a local preview. Production hosting needs an SPA fallback for page routes, an API reverse proxy, HTTPS, and appropriate cookie/CORS settings.
 
 ## API
 
-Основные маршруты текущей реализации:
+Interactive documentation: [Swagger](http://127.0.0.1:8000/docs) · [OpenAPI](http://127.0.0.1:8000/openapi.json).
 
-| Метод | Маршрут | Назначение |
+| Method | Route | Purpose |
 | :--- | :--- | :--- |
-| `POST` | `/auth/register` | Создать аккаунт и попытаться отправить письмо подтверждения |
-| `POST` | `/auth/login` | Войти и получить cookie сессии |
-| `GET` | `/auth/me` | Получить текущего пользователя |
-| `POST` | `/auth/logout` | Завершить сессию |
-| `POST` | `/auth/verify-email` | Подтвердить почту токеном из письма |
-| `POST` | `/auth/resend-verification` | Запросить новое письмо подтверждения |
-| `POST` | `/auth/forgot-password` | Запросить ссылку для восстановления пароля |
-| `POST` | `/auth/reset-password` | Установить новый пароль по токену |
-| `POST`, `GET` | `/teams` | Создать команду или получить свои команды |
-| `GET` | `/teams/{team_id}/members` | Получить участников команды |
-| `POST`, `GET` | `/teams/{team_id}/tasks` | Создать задачу или получить задачи команды |
-| `GET`, `PATCH` | `/teams/{team_id}/tasks/{task_id}` | Получить или изменить задачу |
-| `POST` | `/teams/{team_id}/tasks/{task_id}/complete` | Завершить свою задачу |
-| `GET` | `/teams/{team_id}/my-tasks` | Получить свои задачи в команде |
-| `POST`, `GET` | `/teams/{team_id}/invitations` | Создать приглашение или получить список |
-| `DELETE` | `/teams/{team_id}/invitations/{invitation_id}` | Отменить приглашение |
-| `GET` | `/invitations/{token}` | Просмотреть приглашение |
-| `POST` | `/invitations/{token}/accept` | Принять приглашение |
+| POST | `/auth/register`, `/auth/login`, `/auth/logout` | Account registration and session management |
+| GET, PATCH | `/auth/me` | Read and update your own profile |
+| POST | `/auth/verify-email`, `/auth/resend-verification` | Verify an email address |
+| POST | `/auth/forgot-password`, `/auth/reset-password` | Recover account access |
+| POST, GET | `/teams` | Create a team or list your teams |
+| GET | `/teams/{team_id}/members` | List team members |
+| GET, PATCH | `/teams/{team_id}/members/{member_id}` | Read a profile or update its job title |
+| POST, GET | `/teams/{team_id}/tasks` | Create or list team tasks |
+| GET, PATCH | `/teams/{team_id}/tasks/{task_id}` | Read or update a task |
+| POST | `/teams/{team_id}/tasks/{task_id}/complete` | Complete your own task |
+| GET | `/teams/{team_id}/my-tasks` | List your assigned tasks |
+| POST, GET, DELETE | `/teams/{team_id}/invitations[/{invitation_id}]` | Create, list, or revoke invitations |
+| GET, POST | `/invitations/{token}[/accept]` | Preview or accept an invitation |
+| GET, PUT, DELETE | `/teams/{team_id}/members/{member_id}/private-note` | Manage your private note |
+| GET | `/teams/{team_id}/statistics`, `/my-statistics` | Read task statistics |
+| GET | `/teams/{team_id}/goat[/admin]` | Read monthly ranking results |
+| GET | `/teams/{team_id}/history` | Read daily task history |
 
-Доступ к командным операциям зависит от членства и роли. Актуальные схемы запросов, ответы и ограничения смотрите в Swagger запущенного API.
+Full paths, payloads, access rules, and member-specific statistics/history routes are documented in the [API contract](frontend/docs/API_CONTRACT.md). Swagger reflects the running server's schemas.
 
-## Планы
+## Verification
 
-- [ ] Редактирование своего профиля: имя, телефон, Telegram и часовой пояс.
-- [ ] Анкеты сотрудников с контактами и местным временем.
-- [ ] Личные заметки администратора: отдельные записи для каждого автора.
-- [ ] GOAT: рейтинг команды, статистика и графики.
-- [ ] Общая проверка сложности пароля для регистрации, восстановления и смены. Правила предстоит согласовать.
-- [ ] Подключение интерфейса к API, включая страницы подтверждения почты и сброса пароля.
-- [ ] Подготовка конфигурации и защиты API к публикации.
+The browser checks cover registration, captured verification emails, invitations, task creation/editing/completion, job titles, private notes, profiles, rankings, charts, multiple memberships, sign-out, password recovery, expired sessions, and network failures.
 
-## Структура
+Tests use an isolated temporary database and capture outgoing mail. They do not populate or clear application data. See the [frontend testing instructions](frontend/README.md#integration-checks).
+
+## Roadmap
+
+- [x] Accounts, email verification, sessions, and password recovery.
+- [x] Teams, membership roles, invitations, and team switching.
+- [x] Tasks, private notes, profiles, and contact details.
+- [x] Server statistics, monthly GOAT, and historical charts.
+- [x] Frontend/API integration and browser checks.
+- [x] English interface, messages, emails, and documentation.
+- [ ] Production configuration, deployment, and additional API hardening.
+- [ ] Database migrations and a dedicated backend dependency manifest.
+
+## Structure
 
 ```text
 DeathLine/
 ├── backend/
 │   ├── api/
-│   │   ├── service/       # Логика аккаунтов, команд, задач, приглашений и писем
-│   │   ├── auth.py        # Авторизация и восстановление доступа
-│   │   ├── teams.py       # Командные операции
-│   │   ├── invitations.py # Принятие и просмотр приглашений
-│   │   └── shemas.py      # Схемы запросов и ответов
-│   ├── DataBase/          # Модели и подключение к PostgreSQL
-│   ├── config.py         # Настройки из .env
-│   └── main.py           # Приложение FastAPI
+│   │   ├── service/       # Account, team, task, invitation, and email logic
+│   │   ├── auth.py        # Authentication and account recovery
+│   │   ├── teams.py       # Team operations
+│   │   ├── invitations.py # Invitation preview and acceptance
+│   │   └── shemas.py      # Request and response schemas
+│   ├── DataBase/          # Models and PostgreSQL connection
+│   ├── config.py         # Settings loaded from .env
+│   └── main.py           # FastAPI application
 ├── frontend/
-│   ├── src/features/     # Вход, регистрация, кабинеты и задачи
-│   ├── src/styles/       # Общие стили
-│   └── public/brand/     # Логотип и иллюстрации
-└── docs/assets/          # Оформление README
+│   ├── src/features/     # Account flows, workspaces, and tasks
+│   ├── src/shared/       # API client, session, profile, and team menu
+│   ├── tests/            # Isolated browser integration checks
+│   └── public/brand/     # Logo and illustrations
+└── docs/assets/          # README artwork
 ```
 
-Подробнее: [фронтенд](frontend/README.md) · [план бэкенда](frontend/docs/BACKEND_NEXT_STEPS.md) · [проектный контракт API](frontend/docs/API_CONTRACT.md).
-
-План и проектный контракт содержат предложения для дальнейшей интеграции и могут отличаться от уже реализованных маршрутов. Текущее поведение описывает OpenAPI работающего сервера.
+More details: [frontend](frontend/README.md) · [backend milestones](frontend/docs/BACKEND_NEXT_STEPS.md) · [API contract](frontend/docs/API_CONTRACT.md).

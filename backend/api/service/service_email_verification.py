@@ -18,11 +18,11 @@ def create_email_verification_token(session:SessionDep,user):
     old_tokens=session.query(EmailVerificationTokens).filter(EmailVerificationTokens.user_id==user.id, EmailVerificationTokens.expires_at>now,EmailVerificationTokens.revoked_at.is_(None),EmailVerificationTokens.used_at.is_(None)).all()
 
     if find_user.email_verified_at is not None:
-        raise HTTPException(status_code=409, detail='Почта уже подтверждена')
+        raise HTTPException(status_code=409, detail='Email is already verified')
 
     time_send=session.query(EmailVerificationTokens).filter(EmailVerificationTokens.user_id==user.id).order_by(EmailVerificationTokens.created_at.desc()).first()
     if (time_send is not None) and  (time_send.created_at + timedelta(seconds=60) > now):
-        raise HTTPException(status_code=429,detail='Повторную отправку можно запросить через минуту.')
+        raise HTTPException(status_code=429,detail='Please wait a minute before requesting another email.')
 
     try:
         for old_token in old_tokens:
@@ -55,7 +55,7 @@ def find_email_verification_by_token(session:SessionDep,token:str,lock=False):
         query=query.with_for_update()
     Emailhash=query.first()
     if Emailhash is None:
-        raise HTTPException(status_code=404,detail='Токен подтверждения не найден')
+        raise HTTPException(status_code=404,detail='Email verification token not found')
     else:
         return Emailhash
 
@@ -63,11 +63,11 @@ def check_email_verification_token(token_record):
     now=datetime.now(timezone.utc)
 
     if token_record.used_at is not None:
-        raise HTTPException(status_code=409,detail='Токен уже использован')
+        raise HTTPException(status_code=409,detail='The token has already been used')
     elif token_record.revoked_at is not None:
-        raise HTTPException(status_code=409, detail='Токен отменён')
+        raise HTTPException(status_code=409, detail='The token has been revoked')
     elif token_record.expires_at<=now:
-        raise HTTPException(status_code=409, detail='Срок действия токена истёк')
+        raise HTTPException(status_code=409, detail='The token has expired')
     else:
         return token_record
 
@@ -79,10 +79,10 @@ def confirm_email(session:SessionDep,token):
     token_record=find_email_verification_by_token(session,token,lock=True)
     token_record=check_email_verification_token(token_record)
     if find_user.email != token_record.email:
-        raise HTTPException(status_code=409, detail='Адрес почты изменён')
+        raise HTTPException(status_code=409, detail='The email address has changed')
 
     if find_user.email_verified_at is not None:
-        raise HTTPException(status_code=409,detail='Почта уже подтверждена')
+        raise HTTPException(status_code=409,detail='Email is already verified')
     try:
         now = datetime.now(timezone.utc)
         find_user.email_verified_at=now
@@ -96,8 +96,8 @@ def confirm_email(session:SessionDep,token):
 
 def send_verification_email(user, token):
     verification_url = f"{FRONTEND_URL}/verify-email?token={token}"
-    subject='Подтверждение почты — DeathLine'
-    text=f'Ваша ссылка на подтверждение:\n {verification_url}\n Ссылка активна 24 часа'
+    subject='Verify your email — DeathLine'
+    text=f'Your email verification link:\n {verification_url}\n This link is valid for 24 hours.'
     message=build_email_message(user.email,subject,text)
     send_email(message)
 
@@ -107,7 +107,7 @@ def request_email_verification(session:SessionDep,user):
         send_verification_email(user,token)
     except(SMTPException,OSError) as error:
         print(type(error).__name__)
-        raise HTTPException(status_code=503,detail='Не удалось отправить письмо. Попробуйте позже.')
+        raise HTTPException(status_code=503,detail='Could not send the email. Please try again later.')
 
 
 

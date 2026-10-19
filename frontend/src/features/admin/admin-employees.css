@@ -112,3 +112,8 @@
   .admin-people-back { flex-wrap: wrap; gap: 5px; font-size: 11px; }
   .admin-people-back > span { overflow-wrap: anywhere; }
 }
+
+.admin-member-meta { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin-top:5px; color:#7895b2; font-size:11px; font-weight:400; }
+.admin-member-role { display:inline-flex; align-items:center; padding:3px 7px; border:1px solid #24405a; border-radius:5px; background:#102239; color:#9bb2cd; font-size:10px; font-weight:550; line-height:1.2; white-space:nowrap; }
+.admin-member-role--admin { border-color:#13617e; background:#073046; color:#64d7f3; }
+.admin-person-button > span > strong { font-size:inherit; font-weight:600; }

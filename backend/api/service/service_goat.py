@@ -1,8 +1,7 @@
 from fastapi import HTTPException
 from DataBase.database import SessionDep
 from api.shemas import TaskStatisticsResponseSchema, GoatMemberResponseSchema, GoatAdminResponseSchema, GoatUserResponseSchema
-from zoneinfo import ZoneInfo
-from datetime import datetime,timezone
+from api.time_utils import get_month_bounds
 from DataBase.models import Tasks, Teams
 from .service_team import get_team_members, get_team_member
 from .service_statistics import calculate_task_statistics
@@ -15,21 +14,6 @@ def calculate_goat_score(statistics: TaskStatisticsResponseSchema):
     else:
         GOAT=round((statistics.productivity_percent * 0.6 + statistics.on_time_percent * 0.4),1)
         return GOAT
-
-def get_month_bounds(year: int, month: int, timezone_name: str):
-    team_timezone = ZoneInfo(timezone_name)
-
-    start = datetime(year, month, 1, tzinfo=team_timezone)
-
-    if month == 12:
-        end = datetime(year + 1, 1, 1, tzinfo=team_timezone)
-    else:
-        end = datetime(year, month + 1, 1, tzinfo=team_timezone)
-
-    start = start.astimezone(timezone.utc)
-    end = end.astimezone(timezone.utc)
-
-    return start, end
 
 def get_team_tasks_for_month(session: SessionDep, team_id: int, year: int, month: int, timezone_name: str):
     start, end = get_month_bounds(year, month, timezone_name)
@@ -94,7 +78,7 @@ def sort_goat_members(members):
 def get_admin_goat(session: SessionDep, team_id: int, year: int, month: int):
     find_team=session.query(Teams).filter(Teams.id==team_id).first()
     if find_team is None:
-        raise HTTPException(status_code=404,detail='Команда не найдена')
+        raise HTTPException(status_code=404,detail='Team not found')
     all_goat=build_goat_members(session,team_id,year,month,find_team.timezone)
     sort_all_goats=sort_goat_members(all_goat)
     response = GoatAdminResponseSchema(
@@ -118,7 +102,7 @@ def get_user_goat(session: SessionDep, team_id: int, user_id: int, year: int, mo
             my_result=member
 
     if my_result is None:
-        raise HTTPException(status_code=404, detail='Участник не найден')
+        raise HTTPException(status_code=404, detail='Member not found')
 
     return GoatUserResponseSchema(
         team_id=admin_goat.team_id,

@@ -3,7 +3,7 @@ from datetime import datetime,timezone
 from DataBase.database import SessionDep
 from api.shemas import TaskStatisticsResponseSchema
 from .service_team import find_task_for_id,get_team_tasks,get_team_member_profile
-def calculate_task_statistics(tasks):
+def calculate_task_statistics(tasks, at: datetime | None = None):
     total=0
     active=0
     completed=0
@@ -11,11 +11,11 @@ def calculate_task_statistics(tasks):
     completed_in_time=0
     productivity=0
 
-    now=datetime.now(timezone.utc)
+    now=at if at is not None else datetime.now(timezone.utc)
 
     for task in tasks:
         total+=1
-        if task.completed_at is not None:
+        if task.completed_at is not None and task.completed_at <= now:
             completed+=1
             if task.completed_at<=task.deadline:
                 completed_in_time+=1
@@ -53,7 +53,7 @@ def get_team_task_statistics(session:SessionDep,team_id):
     return calculate
 
 def get_member_task_statistics(session:SessionDep,team_id,employee_member_id):
-    profile=get_team_member_profile(session, team_id, employee_member_id)#карточка сотрудника
+    profile=get_team_member_profile(session, team_id, employee_member_id)# The team member's profile.
     tasks_user=find_task_for_id(session,profile.user.id,profile.team_id)
     calculate=calculate_task_statistics(tasks_user)
     return calculate

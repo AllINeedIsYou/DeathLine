@@ -22,7 +22,7 @@ function monthStart(value: string) {
   const date = new Date(`${value}T12:00:00`);
   return new Date(date.getFullYear(), date.getMonth(), 1, 12);
 }
-const dayLabel = (value: string) => new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${value}T12:00:00`));
+const dayLabel = (value: string) => new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${value}T12:00:00`));
 
 export default function DeadlineField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   const [date, time = ''] = value.split('T');
@@ -73,21 +73,21 @@ export default function DeadlineField({ value, onChange }: { value: string; onCh
   return <fieldset ref={root} className="admin-deadline" onBlur={event => { if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) close(); }} onKeyDown={event => {
     if (event.key === 'Escape' && open) { event.preventDefault(); event.stopPropagation(); close(true); }
   }}>
-    <legend>Дедлайн</legend>
+    <legend>Deadline</legend>
     <div className="admin-deadline__fields">
-      <button ref={trigger} className="admin-deadline__date" type="button" aria-label={`Дата дедлайна: ${date.split('-').reverse().join('.')}`} aria-expanded={open} aria-controls="deadline-calendar" onClick={() => open ? close(true) : showCalendar()}><Icon name="calendar" /><span>{date.split('-').reverse().join('.')}</span><span className="admin-deadline__chevron" aria-hidden="true">⌄</span></button>
-      <label className="admin-deadline__time"><span className="admin-visually-hidden">Время дедлайна</span><Icon name="clock" /><input type="text" name="deadline-time" inputMode="numeric" autoComplete="off" required maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" title="Время в формате ЧЧ:ММ, например 15:30" placeholder="ЧЧ:ММ" value={time} onChange={event => onChange(`${date}T${event.target.value}`)} onBlur={() => {
+      <button ref={trigger} className="admin-deadline__date" type="button" aria-label={`Deadline date: ${date.split('-').reverse().join('.')}`} aria-expanded={open} aria-controls="deadline-calendar" onClick={() => open ? close(true) : showCalendar()}><Icon name="calendar" /><span>{date.split('-').reverse().join('.')}</span><span className="admin-deadline__chevron" aria-hidden="true">⌄</span></button>
+      <label className="admin-deadline__time"><span className="admin-visually-hidden">Deadline time</span><Icon name="clock" /><input type="text" name="deadline-time" inputMode="numeric" autoComplete="off" required maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" title="Time in HH:MM format, for example 15:30" placeholder="HH:MM" value={time} onChange={event => onChange(`${date}T${event.target.value}`)} onBlur={() => {
         const digits = time.replace(/\D/g, '');
         if (/^\d{4}$/.test(digits) && Number(digits.slice(0, 2)) < 24 && Number(digits.slice(2)) < 60) onChange(`${date}T${digits.slice(0, 2)}:${digits.slice(2)}`);
       }} /></label>
     </div>
-    <div className="admin-deadline__quick" role="group" aria-label="Перенести срок"><button type="button" onClick={() => choose(shiftCalendarDate(date, 1))}>+1 день</button><button type="button" onClick={() => choose(shiftCalendarDate(date, 7))}>+неделя</button><button type="button" onClick={() => choose(shiftCalendarMonth(date))}>+месяц</button></div>
-    {open && <div ref={calendar} id="deadline-calendar" className="admin-calendar" role="group" aria-label="Календарь дедлайна">
-      <div className="admin-calendar__heading"><strong aria-live="polite">{new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(month)} {month.getFullYear()}</strong><button type="button" aria-label="Закрыть календарь" onClick={() => close(true)}><Icon name="close" /></button></div>
-      <div className="admin-calendar__navigation"><button type="button" aria-label="Предыдущий месяц" onClick={() => moveMonth(-1)}>‹</button><button type="button" onClick={() => { const today = calendarDateValue(new Date()); setMonth(monthStart(today)); setFocusedDate(today); }}>К текущему месяцу</button><button type="button" aria-label="Следующий месяц" onClick={() => moveMonth(1)}>›</button></div>
-      <div className="admin-calendar__week" aria-hidden="true">{['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => <span key={day}>{day}</span>)}</div>
+    <div className="admin-deadline__quick" role="group" aria-label="Extend deadline"><button type="button" onClick={() => choose(shiftCalendarDate(date, 1))}>+1 day</button><button type="button" onClick={() => choose(shiftCalendarDate(date, 7))}>+1 week</button><button type="button" onClick={() => choose(shiftCalendarMonth(date))}>+1 month</button></div>
+    {open && <div ref={calendar} id="deadline-calendar" className="admin-calendar" role="group" aria-label="Deadline calendar">
+      <div className="admin-calendar__heading"><strong aria-live="polite">{new Intl.DateTimeFormat('en-US', { month: 'long' }).format(month)} {month.getFullYear()}</strong><button type="button" aria-label="Close calendar" onClick={() => close(true)}><Icon name="close" /></button></div>
+      <div className="admin-calendar__navigation"><button type="button" aria-label="Previous month" onClick={() => moveMonth(-1)}>‹</button><button type="button" onClick={() => { const today = calendarDateValue(new Date()); setMonth(monthStart(today)); setFocusedDate(today); }}>Current month</button><button type="button" aria-label="Next month" onClick={() => moveMonth(1)}>›</button></div>
+      <div className="admin-calendar__week" aria-hidden="true">{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => <span key={day}>{day}</span>)}</div>
       <div className="admin-calendar__days">{days.map(day => { const key = calendarDateValue(day); const outside = day.getMonth() !== month.getMonth(); return <button type="button" key={key} data-date={key} className={`${outside ? 'is-outside ' : ''}${key === calendarDateValue(new Date()) ? 'is-today' : ''}`} aria-label={dayLabel(key)} aria-pressed={key === date} tabIndex={key === focusedDate ? 0 : -1} onKeyDown={event => dayKey(event, key)} onClick={() => choose(key)}>{day.getDate()}</button>; })}</div>
-      <p>Выбери день — время останется прежним.</p>
+      <p>Select a day — the time will stay the same.</p>
     </div>}
   </fieldset>;
 }
