@@ -161,6 +161,7 @@ class TeamInvitationResponseSchema(TeamInvitationCreateSchema):
 class TeamInvitationLinkResponseSchema(BaseModel):
     invitation:TeamInvitationResponseSchema
     invite_url:str
+    email_sent:bool
 
 class TeamInvitationListItemSchema(TeamInvitationResponseSchema):
     status:str

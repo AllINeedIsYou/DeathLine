@@ -54,7 +54,7 @@ Legacy `-preview` paths use the same real session and role checks. The top-bar m
 - Administrators and employees retain distinct team roles. A job title is separate from access permissions.
 - Administrators can update a member's job title; users edit their own names, contacts, and time zone.
 - Private notes are fetched for a specific membership and author. Clearing a note sends DELETE.
-- Invitation links are available immediately after creation. Lost links require revoking the old invitation and creating a new one; a raw token cannot be recovered from its hash.
+- Invitation links are emailed automatically and are also available for copying after creation. Pending invitations have a Resend email action, available once a minute; it replaces the previous link. If email delivery fails, the interface reports it and keeps the copyable link available.
 - GOAT comes from the server, using the deadline month in the team's time zone. A score of `0` is displayed as a result; `null` means insufficient data.
 - Charts use recorded server events. Missing historical data appears as gaps, not zeroes.
 - Local storage is only used for the visual glitch preference.
@@ -83,6 +83,7 @@ The default database is temporary SQLite. To test PostgreSQL:
 
 ```sh
 DEATHLINE_TEST_POSTGRES=1 bash frontend/tests/run-integration.sh
+DEATHLINE_TEST_POSTGRES=1 .venv/bin/python frontend/tests/invitation_email_checks.py
 ```
 
 This creates a dedicated `deathline_e2e_<random suffix>` database using the local connection configuration and removes only that database afterward. The PostgreSQL role needs permission to create databases. Test servers use ports 18000 and 15173 and shut down automatically.

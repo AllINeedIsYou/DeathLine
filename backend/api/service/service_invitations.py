@@ -1,5 +1,7 @@
 import hashlib
 import secrets
+import logging
+from smtplib import SMTPException
 from datetime import datetime, timezone, timedelta
 
 
@@ -8,6 +10,61 @@ from DataBase.database import SessionDep
 from api.shemas import TeamInvitationCreateSchema, TeamInvitationListItemSchema, TeamInvitationPreviewSchema
 from DataBase.models import Teams, TeamMembers, Users, TeamInvitations
 from fastapi import HTTPException
+from .service_mail import build_email_message, send_email
+
+logger = logging.getLogger(__name__)
+
+
+def send_team_invitation_email(session: SessionDep, invitation: TeamInvitations, invite_url: str):
+    team = session.query(Teams).filter(Teams.id == invitation.team_id).first()
+    team_name = ' '.join(team.name.splitlines())
+    role = 'Administrator' if invitation.role.value == 'admin' else 'Employee'
+    text = (
+        f'You have been invited to join {team_name} on DeathLine.\n\n'
+        f'Your team role: {role}\n'
+        f'Accept your invitation:\n{invite_url}\n\n'
+        'Sign in or create an account with this email address, verify it, '
+        'and accept the invitation.\n'
+        f'This link expires on {invitation.expires_at:%Y-%m-%d %H:%M %Z}.\n\n'
+        'If you were not expecting this invitation, you can ignore this email.'
+    )
+    try:
+        message = build_email_message(invitation.email, f'Invitation to {team_name} — DeathLine', text)
+        send_email(message)
+    except (SMTPException, OSError) as error:
+        logger.warning('Invitation email delivery failed (%s)', type(error).__name__)
+        return False
+    return True
+
+
+def resend_team_invitation(session: SessionDep, team_id: int, invitation_id: int, creator_id: int):
+    invitation = find_team_invitation(session, team_id, invitation_id, lock=True)
+    if get_invitation_status(invitation) != 'pending':
+        raise HTTPException(status_code=409, detail='Only pending invitations can be resent')
+    now = datetime.now(timezone.utc)
+    if invitation.created_at + timedelta(seconds=60) > now:
+        raise HTTPException(status_code=429, detail='Please wait a minute before resending the invitation')
+    member = session.query(TeamMembers).join(Users, TeamMembers.user_id == Users.id).filter(
+        TeamMembers.team_id == team_id, Users.email == invitation.email
+    ).first()
+    if member is not None:
+        raise HTTPException(status_code=409, detail='The user is already a member of this team')
+    token = secrets.token_urlsafe(32)
+    replacement = TeamInvitations(
+        team_id=team_id, created_by=creator_id, email=invitation.email, role=invitation.role,
+        token_hash=hashlib.sha256(token.encode()).hexdigest(),
+        created_at=now, expires_at=now + timedelta(days=7)
+    )
+    try:
+        invitation.revoked_at = now
+        session.add(replacement)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise
+    session.refresh(replacement)
+    return replacement, token
+
 # Create an invitation and a token for the recipient email.
 def create_team_invitation(session: SessionDep, team_data:TeamInvitationCreateSchema,team_id:int,creator_id:int):
     now=datetime.now(timezone.utc)

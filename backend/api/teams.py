@@ -12,7 +12,7 @@ from .shemas import TeamResponseSchema, TeamCreateSchema, TeamMemberResponseSche
 from .service.service_statistics import get_my_task_statistics,get_team_task_statistics,get_member_task_statistics
 from .service.service_team import create_team, get_user_teams, get_team_members, add_task, get_team_tasks, \
     task_editing, complete_task, find_task_for_id, get_task_for_user, get_team_member_profile, update_team_member
-from .service.service_invitations import create_team_invitation, get_team_invitations, revoke_team_invitation
+from .service.service_invitations import create_team_invitation, get_team_invitations, revoke_team_invitation, resend_team_invitation, send_team_invitation_email
 from .service.service_notes import get_private_worker_note,save_private_worker_note,delete_private_worker_note
 from .service.service_goat import get_admin_goat,get_user_goat
 from .service.service_charts import get_team_task_history, get_member_task_history
@@ -58,15 +58,23 @@ def complete_task_by_id(session:SessionDep,team_id:int, task_id:int,user: Users 
 def get_task_by_id(session:SessionDep,team_id:int,user: Users = Depends(get_current_user)):
     return find_task_for_id(session=session,user_id=user.id,team_id=team_id)
 
-@teams_router.post('/{team_id}/invitations',response_model=TeamInvitationLinkResponseSchema,status_code=201,summary='Create a team invitation and get its link')
+def invitation_response(session: SessionDep, invitation, token):
+    invite_url = f'{FRONTEND_URL.rstrip("/")}/invite/{token}'
+    email_sent = send_team_invitation_email(session, invitation, invite_url)
+    return TeamInvitationLinkResponseSchema(invitation=invitation, invite_url=invite_url, email_sent=email_sent)
+
+
+@teams_router.post('/{team_id}/invitations',response_model=TeamInvitationLinkResponseSchema,status_code=201,summary='Create a team invitation and email its link')
 def invite_in_team(session:SessionDep,team_data:TeamInvitationCreateSchema,member: TeamMembers = Depends(get_current_team_admin)):
     invation,token=create_team_invitation(session=session,team_data=team_data,team_id=member.team_id,creator_id=member.user_id)
-    invite_url=f'{FRONTEND_URL.rstrip("/")}/invite/{token}'
+    return invitation_response(session, invation, token)
 
-    return TeamInvitationLinkResponseSchema(
-        invitation=invation,
-        invite_url=invite_url
-    )
+
+@teams_router.post('/{team_id}/invitations/{invitation_id}/resend',response_model=TeamInvitationLinkResponseSchema,summary='Replace a pending invitation link and resend its email')
+def resend_invitation(session:SessionDep,invitation_id:int,member:TeamMembers=Depends(get_current_team_admin)):
+    invitation,token=resend_team_invitation(session,member.team_id,invitation_id,member.user_id)
+    return invitation_response(session,invitation,token)
+
 @teams_router.get('/{team_id}/invitations',response_model=list[TeamInvitationListItemSchema], summary='Get team invitations and their statuses')
 def get_all_invitations(session:SessionDep,member: TeamMembers = Depends(get_current_team_admin)):
     return get_team_invitations(session=session,team_id=member.team_id)

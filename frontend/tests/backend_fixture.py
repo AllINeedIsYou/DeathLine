@@ -85,13 +85,14 @@ if engine.dialect.name == "sqlite":
                 column.type = UTCDateTime(timezone=True)
 Base.metadata.create_all(engine)
 
-from api.service import service_mail, service_email_verification, service_password_reset  # noqa: E402
+from api.service import service_mail, service_email_verification, service_password_reset, service_invitations  # noqa: E402
 outbox = []
 def capture(message):
     outbox.append({'to': str(message['To']), 'subject': str(message['Subject']), 'text': message.get_content()})
 service_mail.send_email = capture
 service_email_verification.send_email = capture
 service_password_reset.send_email = capture
+service_invitations.send_email = capture
 
 from main import app  # noqa: E402
 if os.getenv('DEATHLINE_TEST_POSTGRES') == '1':

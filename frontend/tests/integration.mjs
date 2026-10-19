@@ -50,9 +50,11 @@ try {
   console.log('PASS auth: register, verification, team creation, protected routes');
   const teamId = new URL(admin.url()).searchParams.get('team'); assert(teamId);
   await admin.locator('#invitation-email').fill(employeeEmail);
-  await admin.getByRole('button', { name: 'Create link', exact: true }).click();
+  await admin.getByRole('button', { name: 'Send invitation', exact: true }).click();
   const linkInput = admin.getByRole('textbox', { name: 'Invitation link', exact: true });
   await linkInput.waitFor(); const inviteUrl = await linkInput.inputValue();
+  assert.equal(new URL(await mailLink(employeeEmail, '/invite/')).pathname, new URL(inviteUrl).pathname);
+  await admin.getByText('Invitation created and email sent.', { exact: true }).waitFor();
   await employee.goto(inviteUrl);
   await register(employee, 'Employee Integration', employeeLogin, employeeEmail);
   await verify(employeeContext, employeeEmail);
@@ -193,7 +195,7 @@ try {
   await admin.getByRole('button', { name: 'Invite to team', exact: true }).click();
   const cancelledEmail = `cancel${suffix}@example.com`;
   await admin.locator('#invitation-email').fill(cancelledEmail);
-  await admin.getByRole('button', { name: 'Create link', exact: true }).click();
+  await admin.getByRole('button', { name: 'Send invitation', exact: true }).click();
   const cancelledLink = await admin.getByRole('textbox', { name: 'Invitation link', exact: true }).inputValue();
   const cancelledRow = admin.locator('.invite-row').filter({ hasText: cancelledEmail });
   await cancelledRow.getByRole('button', { name: 'Revoke', exact: true }).click();

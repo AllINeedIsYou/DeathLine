@@ -35,7 +35,7 @@ A dark interface, cyan accents, live timers, and optional glitch effects give th
 
 **Accounts:** registration, sign-in, sign-out, email verification, and password recovery. A successful password reset invalidates existing sessions and consumes the reset token. New passwords require 8–128 characters, an uppercase letter, and a special character.
 
-**Teams:** administrator and employee roles belong to memberships. An account can join multiple teams with different roles. Invitations are email-bound, expire after seven days, and can be revoked. The directory distinguishes team roles from job titles.
+**Teams:** administrator and employee roles belong to memberships. An account can join multiple teams with different roles. Invitations are emailed automatically, bound to the recipient email, expire after seven days, and can be revoked or resent. The directory distinguishes team roles from job titles.
 
 **Tasks:** each task has an assignee, priority, deadline, and creation/update/completion timestamps. An overdue task stays open until its assignee completes it. Task events preserve historical deadlines and assignments.
 

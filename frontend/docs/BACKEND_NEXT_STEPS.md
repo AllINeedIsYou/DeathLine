@@ -30,7 +30,7 @@ PATCH changes only supplied fields. Empty PATCH requests preserve `updated_at`. 
 
 Administrators invite a specific email as an employee or administrator. Seven-day invitation links contain random tokens; only hashes are stored. Recipients need an authenticated account with the matching verified email. Acceptance creates membership and consumes the invitation atomically.
 
-Administrators can inspect statuses and revoke invitations. Expired or revoked links do not become valid again. Duplicate active invitations and invitations for existing members are rejected. Raw links are available when created; lost links are replaced by revoking the old invitation and creating a new one.
+Administrators can inspect statuses and revoke invitations. Expired or revoked links do not become valid again. Duplicate active invitations and invitations for existing members are rejected. Links are emailed automatically and remain available for manual copying. Resending a pending invitation atomically revokes the previous link and issues a new one; requests are limited to once a minute. SMTP failures are reported without discarding the invitation.
 
 ## 5. Profiles and private notes — complete
 

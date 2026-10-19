@@ -36,13 +36,14 @@ New passwords require 8–128 characters, at least one uppercase letter and one 
 | GET | `/teams/{team_id}/members` | Members with nested `user`, role, and job title; admin |
 | GET | `/teams/{team_id}/members/{employee_member_id}` | Member profile; admin |
 | PATCH | `/teams/{team_id}/members/{employee_member_id}` | `job_title`, or `null` to clear it; admin |
-| POST | `/teams/{team_id}/invitations` | `email`, `role`; 201, `{invitation, invite_url}`; admin |
+| POST | `/teams/{team_id}/invitations` | `email`, `role`; 201, `{invitation, invite_url, email_sent}`; admin |
 | GET | `/teams/{team_id}/invitations` | Invitations and statuses; admin |
+| POST | `/teams/{team_id}/invitations/{invitation_id}/resend` | Replace a pending link and email the new invitation; admin |
 | DELETE | `/teams/{team_id}/invitations/{invitation_id}` | Revoke an invitation, 204; admin |
 | GET | `/invitations/{token}` | Public preview: `team_id`, `team_name`, `email`, `role`, `expires_at`, `status` |
 | POST | `/invitations/{token}/accept` | 204; current account must have the matching verified email |
 
-Statuses: `pending`, `accepted`, `expired`, `revoked`. Links last seven days. Lists do not expose raw tokens: the frontend offers a copy action immediately after creation. After verifying their email, recipients return to the original invitation tab. The invitation determines the role; registration cannot grant an administrator role.
+Statuses: `pending`, `accepted`, `expired`, `revoked`. Links last seven days. Creation automatically emails the invitation and returns `email_sent`. If SMTP fails, the invitation and copyable link remain valid and `email_sent=false`. Lists do not expose raw tokens. Resending revokes the old invitation and creates a new link in one transaction; the previous link stops working. Only pending invitations can be resent, no more than once a minute. Expired and revoked invitations must be replaced using a new invitation. After verifying their email, recipients return to the original invitation tab. The invitation determines the role; registration cannot grant an administrator role.
 
 ## Tasks
 
