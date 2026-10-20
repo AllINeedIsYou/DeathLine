@@ -50,7 +50,7 @@ Legacy `-preview` paths use the same real session and role checks. The top-bar m
 
 - All business data is loaded and saved through the API. There are no demo users, tasks, or scores.
 - A successful save is shown only after a server response. Errors leave the form and draft intact.
-- Lists refresh after mutations, when the window regains focus, and every 30 seconds while visible.
+- Tasks, members, invitations, statistics, ratings, charts, and account memberships refresh every 10 seconds while the tab is visible and online. Returning to the tab or reconnecting also triggers a refresh. Background refreshes preserve unsaved forms and do not interrupt pending requests.
 - Administrators and employees retain distinct team roles. A job title is separate from access permissions.
 - Administrators can update a member's job title; users edit their own names, contacts, and time zone.
 - Private notes are fetched for a specific membership and author. Clearing a note sends DELETE.
@@ -91,3 +91,7 @@ This creates a dedicated `deathline_e2e_<random suffix>` database using the loca
 Coverage includes registration and verification emails, invitations, task creation/editing/completion, job titles, private notes, profiles, rankings, history, multiple memberships, administrator-owned tasks, invitation revocation, sign-out, password recovery, expired sessions, connection failures, and retrying a failed save.
 
 See the [API contract](docs/API_CONTRACT.md) for routes and fields, or Swagger on the running backend for complete schemas.
+
+## Automatic refresh checks
+
+With the local frontend running and Playwright available, run `node tests/auto-refresh.mjs` from `frontend`. Set `PLAYWRIGHT_PACKAGE` if Playwright is installed outside the project. The check mocks the API; it does not touch application data or send email. It covers updates between two users, refreshed team memberships, retained drafts, network recovery, hidden/offline tabs, and slow requests.

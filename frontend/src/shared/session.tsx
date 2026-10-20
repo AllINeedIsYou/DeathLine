@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { api, ApiError, errorText, type Team, type User } from './api';
+import { subscribeToRefresh } from './autoRefresh';
 
 const SessionContext = createContext<ReturnType<typeof useSessionState> | null>(null);
 function useSessionState() {
@@ -8,7 +9,10 @@ function useSessionState() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const generation = useRef(0);
-  async function reload() {
+  const pending = useRef(0);
+  const reload = useCallback(async (background = false) => {
+    if (background && pending.current > 0) return null;
+    pending.current++;
     const current = ++generation.current;
     try {
       const account = await api<User>('/auth/me');
@@ -18,17 +22,21 @@ function useSessionState() {
     } catch (reason) {
       if (generation.current === current) {
         if (reason instanceof ApiError && reason.status === 401) { setUser(null); setTeams([]); setError(''); }
-        else setError(errorText(reason));
+        else if (!background) setError(errorText(reason));
       }
       return null;
-    } finally { if (generation.current === current) setLoading(false); }
-  }
+    } finally { pending.current--; if (generation.current === current) setLoading(false); }
+  }, []);
   useEffect(() => {
     void reload();
     const expired = () => { generation.current++; setUser(null); setTeams([]); setLoading(false); };
     window.addEventListener('deathline:unauthorized', expired);
     return () => { generation.current++; window.removeEventListener('deathline:unauthorized', expired); };
-  }, []);
+  }, [reload]);
+  useEffect(() => {
+    if (!user?.id) return;
+    return subscribeToRefresh(() => void reload(true));
+  }, [user?.id, reload]);
   async function login(username: string, password: string) {
     await api<User>('/auth/login', { method: 'POST', body: { username, password } });
     const result = await reload();

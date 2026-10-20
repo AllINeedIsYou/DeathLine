@@ -98,4 +98,4 @@ GOAT and history require `year` from 2000 to 2100 and `month` from 1 to 12.
 
 401 ends the authenticated screen and opens sign-in. 403 means access denied. 404 means an object is unavailable in the current scope. 409 is a duplicate or state conflict. 422 reports invalid fields. 429 means an action is being requested too frequently. Forms display errors without simulating successful writes.
 
-Lists refresh after mutations, when focus returns, and every 30 seconds while the tab is visible. Ratings and historical charts are not reconstructed from current deadlines in the browser. This version does not require WebSocket.
+Lists refresh after mutations, when focus or tab visibility returns, after reconnection, and every 10 seconds while the tab is visible and online. Background refreshes preserve unsaved forms and skip resources that already have a request in progress. Ratings and historical charts are not reconstructed from current deadlines in the browser. This version does not require WebSocket.

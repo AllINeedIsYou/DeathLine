@@ -50,7 +50,7 @@ Task creation, update, and completion record immutable event snapshots in the sa
 
 ## 7. Frontend integration — complete
 
-The frontend uses cookie-authenticated API requests, protected routes, team switching, real mutations, field errors, and loading/retry states. It refreshes after actions, when the window regains focus, and every 30 seconds in a visible tab. It contains no demo business records or browser-local task storage.
+The frontend uses cookie-authenticated API requests, protected routes, team switching, real mutations, field errors, and loading/retry states. It refreshes after actions, when focus or tab visibility returns, after reconnection, and every 10 seconds in a visible, online tab. Account memberships also refresh automatically, and background refresh failures preserve open forms. It contains no demo business records or browser-local task storage.
 
 The integrated browser checks use real API routes, a temporary database, and captured emails. PostgreSQL mode creates and removes its own separate test database. Working application data and real email delivery are not used by these checks.
 
