@@ -28,13 +28,14 @@ Set these **server environment variables** in Render, never in Git or the fronte
 | Variable | Value |
 | --- | --- |
 | `DATABASE_URL` | The Neon PostgreSQL connection string, including TLS options such as `sslmode=require` |
+| `DATABASE_URL_UNPOOLED` | Neon's direct connection string, without `-pooler` in the hostname, for schema initialization |
 | `MAIL_PROVIDER` | `brevo` |
 | `MAIL_FROM_EMAIL` | Your verified Brevo sender email |
 | `BREVO_API_KEY` | Your Brevo API key, not an SMTP password |
 | `SMTP_FROM_NAME` | `DeathLine` |
 | `COOKIE_SECURE` | `true` |
 
-Neon's `postgresql://` connection format is accepted and uses the psycopg driver. A pooled Neon URL is supported. `FRONTEND_URL` automatically uses `RENDER_EXTERNAL_URL`; set it explicitly only if using your own domain. Leave `VITE_API_URL` unset: the browser uses `/api` on the same origin, and no cross-site cookie settings are needed.
+Neon's `postgresql://` connection format is accepted and uses the psycopg driver. Use the pooled URL for application traffic and the direct URL for schema initialization. Without `DATABASE_URL_UNPOOLED`, initialization uses `DATABASE_URL`, preserving local development behavior. `FRONTEND_URL` automatically uses `RENDER_EXTERNAL_URL`; set it explicitly only if using your own domain. Leave `VITE_API_URL` unset: the browser uses `/api` on the same origin, and no cross-site cookie settings are needed.
 
 The image installs pinned Python dependencies, builds the frontend with its frozen pnpm lockfile, then runs as a non-root user. It excludes local `.env` files, dependencies, IDE settings, tests, and local database files from the build context. Startup creates missing tables without dropping existing ones. Existing columns still require explicit migrations.
 

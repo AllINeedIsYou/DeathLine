@@ -70,6 +70,7 @@ config.SMTP_FROM_NAME = 'DeathLine Test'
 config.MAIL_PROVIDER = 'smtp'
 config.MAIL_FROM_EMAIL = config.SMTP_USER
 config.BREVO_API_KEY = ''
+config.DATABASE_URL_UNPOOLED = None
 config.COOKIE_SECURE = False
 config.SERVE_FRONTEND = False
 config.FRONTEND_DIST = ROOT / 'frontend/dist'
