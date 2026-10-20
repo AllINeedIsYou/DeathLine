@@ -76,8 +76,7 @@ You need **Python 3.14**, **Node.js 22+**, and **PostgreSQL**. Start in the repo
 ```sh
 python3.14 -m venv .venv
 source .venv/bin/activate
-python -m pip install fastapi 'uvicorn[standard]' sqlalchemy 'psycopg[binary]' \
-  'pwdlib[argon2]' 'pydantic[email]' pydantic-extra-types phonenumbers python-dotenv
+python -m pip install -r backend/requirements.txt
 ```
 
 Create your PostgreSQL database and copy [`backend/.env.example`](backend/.env.example) to `backend/.env`. Set your own connection URL and SMTP credentials:
@@ -100,15 +99,11 @@ Create missing tables without clearing existing data:
 
 ```sh
 cd backend
-python - <<'PY'
-from DataBase.database import Base, engine
-from DataBase import models
-Base.metadata.create_all(bind=engine)
-PY
+python init_db.py
 python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Changes to existing database columns require a migration; `create_all` only creates missing tables. Backend dependencies are currently listed in the installation command above rather than a dedicated requirements file.
+Changes to existing database columns require a migration; `create_all` only creates missing tables. Tested backend dependencies are pinned in `backend/requirements.txt`.
 
 ### Frontend
 
@@ -122,7 +117,7 @@ npm run dev
 
 Alternatively, use `pnpm install --frozen-lockfile` and `pnpm dev`. Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Vite proxies `/api` to the backend on port 8000, keeping local browser requests on one origin. Verification and reset links open dedicated frontend pages.
 
-`npm run build` produces `frontend/dist/`; `npm run preview` serves a local preview. Production hosting needs an SPA fallback for page routes, an API reverse proxy, HTTPS, and appropriate cookie/CORS settings.
+`npm run build` produces `frontend/dist/`; `npm run preview` serves a local preview. The production Docker image serves the frontend and `/api` together, with an SPA fallback and secure cookies. See [free hosting setup](docs/DEPLOYMENT.md) for Render, Neon, and transactional email configuration.
 
 ## API
 
@@ -164,8 +159,9 @@ Tests use an isolated temporary database and capture outgoing mail. They do not 
 - [x] Server statistics, monthly GOAT, and historical charts.
 - [x] Frontend/API integration and browser checks.
 - [x] English interface, messages, emails, and documentation.
-- [ ] Production configuration, deployment, and additional API hardening.
-- [ ] Database migrations and a dedicated backend dependency manifest.
+- [x] Production container, pinned backend dependencies, secure cookies, and HTTPS email transport.
+- [ ] Public deployment and additional API hardening.
+- [ ] Database migrations.
 
 ## Structure
 

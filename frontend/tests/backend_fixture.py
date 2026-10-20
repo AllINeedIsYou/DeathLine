@@ -67,6 +67,13 @@ config.SMTP_HOST = 'unused.invalid'
 config.SMTP_PORT = 465
 config.SMTP_PASSWORD = ''
 config.SMTP_FROM_NAME = 'DeathLine Test'
+config.MAIL_PROVIDER = 'smtp'
+config.MAIL_FROM_EMAIL = config.SMTP_USER
+config.BREVO_API_KEY = ''
+config.COOKIE_SECURE = False
+config.SERVE_FRONTEND = False
+config.FRONTEND_DIST = ROOT / 'frontend/dist'
+config.CORS_ORIGINS = ['http://127.0.0.1:5173', 'http://localhost:5173']
 sys.modules['config'] = config
 
 from DataBase.models import Users  # noqa: E402

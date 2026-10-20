@@ -1,0 +1,15 @@
+.git
+.idea
+.venv
+**/node_modules
+**/dist
+**/__pycache__
+**/*.pyc
+**/.env
+**/.env.*
+**/*.sqlite*
+**/*.db
+**/*.tsbuildinfo
+frontend/tests
+frontend/vite.config.js
+frontend/vite.config.d.ts

@@ -9,6 +9,7 @@ from .service.service_email_verification import confirm_email,request_email_veri
 from .service.service_password_reset import request_password_reset
 from .service.service_password_reset import reset_password
 from .service.service_users import update_current_user
+from config import COOKIE_SECURE
 
 auth_router = APIRouter(prefix='/auth', tags=['Auth'])
 
@@ -39,7 +40,7 @@ def login(session:SessionDep, user_data:UserLoginSchema, response:Response):
         expires=expires_at,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=COOKIE_SECURE,
         path="/"
     )
     return user
@@ -57,7 +58,7 @@ def update_user(session:SessionDep,user_data:UserUpdateSchema,user: Users = Depe
 def logout(session:SessionDep, response:Response,request: Request):
     token=request.cookies.get("deathline_session")
     delete_session(session=session,token=token)
-    response.delete_cookie(key="deathline_session",path="/")
+    response.delete_cookie(key="deathline_session",path="/",httponly=True,samesite="lax",secure=COOKIE_SECURE)
     return
 
 
