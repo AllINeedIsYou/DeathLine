@@ -4,7 +4,7 @@ import { clockText, dateText, priorities, taskStatus, type Priority, type Task, 
 import './employee.css';
 import { useTeamData } from '../data/team-data';
 import { useSession } from '../../shared/session';
-import AccountMenu from '../../shared/AccountMenu';
+import AccountMenu, { TeamSwitch } from '../../shared/AccountMenu';
 import EmployeeGoat from './EmployeeGoat';
 
 type IconName = 'home' | 'tasks' | 'search' | 'clock' | 'check' | 'arrow' | 'calendar' | 'bolt' | 'close' | 'exit' | 'empty' | 'trophy' | 'chevron' | 'team' | 'chart' | 'plus' | 'edit' | 'columns';
@@ -134,7 +134,7 @@ export default function EmployeeScreen() {
     <div className="employee-workspace">
       <header className="employee-topbar">
         {view !== 'goats' ? <div className="employee-search"><Icon name="search" /><input type="search" aria-label="Search tasks" placeholder="Search tasks…" value={query} onChange={event => setQuery(event.target.value)} />{query && <button className="employee-icon-button" type="button" aria-label="Clear search" onClick={() => setQuery('')}><Icon name="close" /></button>}</div> : <div className="employee-topbar__label"><Icon name="trophy" />Team ranking</div>}
-        <AccountMenu />
+        <TeamSwitch /><AccountMenu />
       </header>
 
       <main className="employee-main">{statistics.error && <p className="connection-banner" role="alert">Statistics: {statistics.error}</p>}
