@@ -3,7 +3,7 @@ services:
     name: deathline
     runtime: docker
     plan: free
-    region: frankfurt
+    region: ohio
     branch: main
     dockerfilePath: ./Dockerfile
     healthCheckPath: /healthz

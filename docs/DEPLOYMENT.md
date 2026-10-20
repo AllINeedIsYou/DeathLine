@@ -5,7 +5,7 @@ DeathLine can run as one free Render web service, with PostgreSQL on Neon and tr
 ## Accounts and plans
 
 - **Render Free:** https://dashboard.render.com/ — one Docker web service for the frontend and API. It sleeps after inactivity, so the first visit may take about a minute. Its filesystem is temporary. Standard outbound SMTP ports are blocked.
-- **Neon Free:** https://console.neon.tech/ — a separate PostgreSQL project. Keep the free plan and choose a European region near Render's Frankfurt region. The current free plan includes 1 GB of storage and 100 CU-hours per project per month; compute sleeps when idle. Keep independent database backups.
+- **Neon Free:** https://console.neon.tech/ — a separate PostgreSQL project. Keep the free plan and locate Render in the same region as the database. This deployment uses Ohio for both. The current free plan includes 1 GB of storage and 100 CU-hours per project per month; compute sleeps when idle. Keep independent database backups.
 - **Brevo Free:** https://app.brevo.com/ — up to 300 emails per day on the current free plan. Verify the sender email and complete the transactional account activation. Gmail senders may be rewritten to a Brevo sending domain; a personal domain improves deliverability but is optional for initial setup.
 
 The local database is not uploaded or reset. A new cloud database starts empty. Moving existing records is a separate, explicit migration.
@@ -18,7 +18,7 @@ The repository includes `render.yaml` and a multi-stage `Dockerfile`. Create a R
 | --- | --- |
 | Runtime | Docker |
 | Plan | Free |
-| Region | Frankfurt |
+| Region | Ohio (matching the existing Neon project) |
 | Dockerfile | `./Dockerfile` |
 | Health check | `/healthz` |
 | Port | Use Render's `PORT` automatically |
