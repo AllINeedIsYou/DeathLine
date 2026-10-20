@@ -1,6 +1,7 @@
 ![DeathLine — tasks, teams, time](docs/assets/readme-cover.svg)
 
 <p align="center">
+  <a href="https://deathline-uy9t.onrender.com/">Live app</a> ·
   <strong>Keep deadlines under control.</strong><br>
   A team workspace where every task has an owner, a deadline, and a result.
 </p>
@@ -160,7 +161,8 @@ Tests use an isolated temporary database and capture outgoing mail. They do not 
 - [x] Frontend/API integration and browser checks.
 - [x] English interface, messages, emails, and documentation.
 - [x] Production container, pinned backend dependencies, secure cookies, and HTTPS email transport.
-- [ ] Public deployment and additional API hardening.
+- [x] Public deployment on Render with PostgreSQL on Neon.
+- [ ] Additional API hardening.
 - [ ] Database migrations.
 
 ## Structure

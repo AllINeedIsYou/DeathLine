@@ -1,5 +1,9 @@
 # Free hosting
 
+Live application: **https://deathline-uy9t.onrender.com/**. API documentation: https://deathline-uy9t.onrender.com/api/docs.
+
+The running service was created through Render's integration. Its environment variables are managed in the Render Dashboard; `render.yaml` remains a reproducible template and does not automatically overwrite the running service's secrets.
+
 DeathLine can run as one free Render web service, with PostgreSQL on Neon and transactional email through the Brevo HTTPS API. No custom domain is required. Check each provider's current limits before creating resources; do not select a paid tier.
 
 ## Accounts and plans
