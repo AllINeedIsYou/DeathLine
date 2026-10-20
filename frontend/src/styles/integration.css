@@ -4,6 +4,7 @@
 .connection-banner { margin:0 0 20px; padding:14px 18px; border:1px solid #714547; border-radius:10px; background:#241923; color:#ffc4c4; line-height:1.6; }
 .connection-banner button { margin-left:12px; }
 button:disabled { opacity:.55; cursor:wait; }
+.employee-topbar > .account-menu { margin-left:auto; flex-shrink:0; }
 .team-switch { position:relative; flex-shrink:0; margin-right:6px; }
 .team-switch__trigger { display:flex; align-items:center; gap:9px; min-height:40px; max-width:220px; padding:9px 11px; border:1px solid #153858; border-radius:8px; background:linear-gradient(120deg,#071a30,#061326); color:#c2d5ed; font:inherit; font-size:12px; font-weight:550; text-align:left; cursor:pointer; transition:border-color .16s,background .16s,box-shadow .16s; }
 .team-switch__trigger:hover,.team-switch__trigger[aria-expanded="true"] { border-color:#257298; background:#0a2139; color:#e4f2ff; }
@@ -31,6 +32,8 @@ button:disabled { opacity:.55; cursor:wait; }
 .account-dialog p { line-height:1.6; }
 .join-stage .join-secondary { display:block; }
 @media(max-width:600px) {
+  .employee-topbar { flex-wrap:wrap; }
+  .employee-search { flex-basis:100%; }
   .team-switch { margin-right:0; }
   .team-switch__trigger { max-width:145px; gap:7px; padding-inline:9px; font-size:11px; }
   .team-switch__icon { width:13px; height:13px; }

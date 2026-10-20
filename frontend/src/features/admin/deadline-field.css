@@ -1,12 +1,12 @@
 .admin-deadline { width: 100%; }
-.admin-deadline__fields { display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 8px; }
+.admin-deadline__fields { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 8px; }
 .admin-deadline__date, .admin-deadline__time { display: flex; align-items: center; min-width: 0; min-height: 46px; gap: 8px; padding: 10px; border: 1px solid #194775; border-radius: 8px; background: #05152f; color: #d6e6fa; font-size: 12px; }
 .admin-deadline__date:hover { border-color: #1488b5; }
 .admin-deadline__date[aria-expanded="true"] { border-color: #00c8ff; background: #06304a; }
 .admin-deadline__date > svg, .admin-deadline__time > svg { width: 15px; height: 15px; color: #79a7d2; }
 .admin-deadline__chevron { margin-left: auto; color: #79a7d2; }
 .admin-deadline__time { gap: 6px; }
-.admin-task-editor .admin-deadline__time input { min-height: 0; height: auto; min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; font-size: 12px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.admin-task-editor .admin-deadline__time input[type="text"] { flex: 1; width: 5ch; min-width: 5ch; min-height: 0; height: auto; padding: 0; border: 0; border-radius: 0; background: transparent; font-size: 12px; line-height: 1.6; font-variant-numeric: tabular-nums; }
 .admin-deadline__time:focus-within { outline: 2px solid #00c8ff; outline-offset: 2px; }
 .admin-tasks .admin-deadline__time input:focus-visible { outline: none; }
 .admin-deadline__quick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 9px; }
